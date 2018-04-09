@@ -4,31 +4,74 @@
 \alias{isniglm}
 \title{Function for ISNI computation when the outcome follows GLMs.}
 \usage{
-isniglm(ymodel, gmodel, ydist = "gaussian", alldata, flag = 0)
+isniglm(formula, family = gaussian, data, weights, subset, start = NULL,
+  offset)
 }
 \arguments{
-\item{ymodel}{an object of class "formula": a symbolic description of the model to be fitted for the outcome}
+\item{formula}{an object of class "Formula": a symbolic description of the models to be fitted for the outcome and missingness status variable.
+The details of model specification are given under "Details".}
 
-\item{gmodel}{an object of class "formula": a symbolic description of the selection model to be fitted for the missingness indictor g}
+\item{family}{a description of the error distribution to be used in the GLM for the outcome.}
 
-\item{ydist}{a description of the error distribution to be used in the GLM for the outcome y}
+\item{data}{the name of data frame containing the variables in the model and all the observations including those intended to be collected 
+but became missing.}
 
-\item{alldata}{the name of data frame containing all the variables in the model and all the observations including those intended to be collected but became missing.}
+\item{weights}{an optional vector of "prior weights" to be used in the fitting process for the outcome model and the missingness mechanism model.
+Should be NULL or a numeric vector.}
 
-\item{flag}{an indicator of using log link (instead of inverse) for Gamma distribution}
+\item{subset}{an optional vector specifying a subset of observations to be used in the fitting process for the outcome model and the missingness mechanism model.}
+
+\item{start}{starting values for the parameters in the linear predictor of the outcome model.}
+
+\item{offset}{an optional vector to specify an a priori known component to be included in the linear predictor during fitting the GLM for the outcome. 
+This should be NULL or a numeric vector of length equal to the number of observations.}
 }
 \description{
 Calculate the ISNI when the regression outcome is subject to missingness and follows generalized linear models (GLMs)
 }
+\details{
+The ISNI analysis is based on a joint selection model and requires specifying two model equations: the complete-data model and the missing data mechanism model.
+       To specify the variables in the models and required for computing the ISNI measures, we make use of the  \code{R} package "Formula"  designed for handling model
+       equations with multiple responses    and multiple sets of predictors. At a minimum, the user should supply a single-equation 
+        in the typical form:  \code{response} ~ \code{Xterms} where \code{response} is the (numeric or factor) vector for the outcome of interest and \code{Xterms} 
+       is a series of terms, separated by + operators, which specify a linear predictor for response. With the signle-equation specification, the \code{isnimgm} function 
+        will by default use (\code{is.na(response)}) as the 
+         missingness status variable and \code{Xterms} as the observed predictors for missingness. The \code{isniglm} then computes the MAR estimates and conducts ISNI computation
+        to evaluate the rate of change of model estimates in the neighborhood of the MAR model where the missingness probability is allowed to depend on the unobserved value 
+        of \code{response},   even after  conditioning on the other  missingness predictors. 
+
+        The above single-equation formula specification uses the same set of predictors for the outcome model and the missingness mechanism model for computing ISNI. 
+        To use different sets of predictors, one can explicitly specifiy a two-equation formula as: \code{response} | \code{is.na(response)} ~ \code{Xterms} |  \code{Sterms},
+       which specifies the formula  for the complete-data model as \code{response} ~ \code{Xterms} and that for the missing data mechanism model as \code{is.na(response)} ~ \code{Sterms}, and 
+       \code{Xterms} and the observed predictors for missingness \code{Sterms} can be different.
+}
 \examples{
-   ## load data set
-   data(r99)
+## load data set
+data(sos)
 
-   ymodel= y ~ gender+fac+genderbyfac
+## Perform the MAR analysis
+ymodel= sexact  ~ gender*faculty
+summary(glm(ymodel,family=binomial, data=sos))
 
-   print(summary(glm(ymodel,family=binomial(link=logit), data=r99, subset=g==0)))
+## Perform ISNI analysis
+sos.isni<-isniglm(ymodel, family=binomial, data=sos)
+sos.isni
+summary(sos.isni)
 
-   gmodel= g~gender+fac+genderbyfac
-   isnicSBsurvey<-isniglm(ymodel,gmodel=gmodel,ydist='binomial', alldata=r99)
-   summary(isnicSBsurvey)
+## specifying the missing data model explicitly
+ygmodel= sexact | is.na(sexact)  ~ gender*faculty | gender *faculty
+summary(isniglm(ygmodel, family=binomial, data=sos))
+ 
+
+ ## ISNI for grouped binomial regression. 
+gender <- c(0,0,1,1,0,0,1,1)
+faculty    <- c(0,0,0,0,1,1,1,1)
+gender = factor(gender, levels = c(0, 1), labels =c("male", "female"))
+faculty = factor(faculty, levels = c(0, 1), labels =c("other", "mdv"))
+ 
+SAcount <- c(NA, 1277, NA, 1247, NA, 126, NA, 152)
+total       <- c(1189,1710,978,1657,68,215,73,246)
+sosgrp <- data.frame(gender=gender, faculty=faculty, SAcount=SAcount, total=total)
+ymodel <- SAcount/total ~gender*faculty
+sosgrp.isni<-isniglm(ymodel, family=binomial, data=sosgrp, weight=total)
 }

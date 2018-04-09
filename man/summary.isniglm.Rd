@@ -4,12 +4,18 @@
 \alias{summary.isniglm}
 \title{Function to print out a summary of isniglm  object in a matrix form.}
 \usage{
-\method{summary}{isniglm}(object, ...)
+\method{summary}{isniglm}(object, digits = max(3, getOption("digits") - 2),
+  ...)
 }
 \arguments{
 \item{object}{the isniglm object obtained from the isniglm function}
 
-\item{...}{additional arguements}
+\item{digits}{the number of significant digits to use when printing}
+
+\item{...}{further arguments passed to or from other methods.}
+}
+\value{
+The function summarizes the MAR coefficient estimates, standard errors, isni and c statistics from the isniglm object as a matrix form.
 }
 \description{
 Function to print out a summary of isniglm  object in a matrix form.

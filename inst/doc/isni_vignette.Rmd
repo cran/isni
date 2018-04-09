@@ -1,0 +1,99 @@
+---
+title: "isni"
+author: "Hui Xie"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+The `isni` package provides functions to compute, print and summarize the Index of Sensitivity to Nonignorability (ISNI).  One can compute the sensitivity index without estimating any nonignorable models or positing specific magnitude of nonignorability. Thus ISNI provides a simple quantitative assessment of how robust the standard estimates assuming missing at random is with respect to the assumption of ignorability. This vignette serves as a quick start for how to use the package. Currently the package provides ISNI computation for 
+
+- Generalized Linear Model (GLM) for independent data
+- Marginal Multivariate Gaussian Model for longitudinal/clustered data
+- linear mixed model for longitudinal/clustered data
+
+It allows for arbitrary patterns of missingness in the longitudinal regression outcomes caused by dropout and/or intermittent missingness.
+
+## The `sos` example
+
+`sos` is dataset on a cross-sectional survey of sexual practices among students at the University of Edinburgh. The response variable is the students' answer to the question ``Have you ever had sexual intercourse?''. Because of the sensitivity of this question, many students declined to answer, leading to substantial missing data. We consider a simplified data set consisting of the answer to this question, with the student's sex and faculty as predictors.
+
+```{r}
+library(isni)
+data(sos)
+sos[sample(nrow(sos),10),]
+```
+The R code above loads the library `isni` and the data frame `sos`, displaying a random subsample of $10$ records. `sos` includes the following factor variables: `sexact` is the response to the question ``Have you ever had sexual intercourse?`` (two levels: no (reference level), yes); `gender` is the student's sex (two levels: male (reference level), female); `faculty` is the student's faculty (medical/dental/veterinary, all other faculty categories (reference level)).
+
+Assuming ignorable nonresponse, one can fit a logistic model (using responders only) to predict the outcome by sex, faculty and their interaction. We estimated the model with function \code{glm()}:
+
+```{r}
+ymodel= sexact  ~ gender*faculty
+summary(glm(ymodel,family=binomial, data=sos))
+```
+The estimates show that students in a medical faculty were less likely to report having had sexual intercourse. Because only 62.4% responded to the sexual practice question, there is concern that this analysis is sensitive to the assumption of ignorability.  For this purpose one can conduct an ISNI analysis for this model with the function `isniglm()`.  We posit a nonignorable nonresponse model in the following form
+\begin{eqnarray}
+logit (Prob(is.na(sexact)=``yes''))=\gamma_{0}^T s +\gamma_1*sexact 
+\end{eqnarray}
+where the observed missingness predictor `s` including `gender`, `faculty` and their interaction. In the above nonresponse model, the probability of nonresponse to the sexual practice question is associated with the observed missingness predictor `s` via the  parameter $\gamma_0$ and is associated with the partially missing outcome `sexact` via the parameter $\gamma_1$. The nonignorable parameter $\gamma_1$ captures the mangnitude and nature of nonignrable missingness. When $\gamma_1=0$, the nonresponse becomes ignorable in the sense that the probability of missingness is indepdent of unobserved values of `sexact`. The above MAR analysis provides consistent and valid estimates.  When $\gamma_1$ departs from zero, the nonresponse becomes nonignorable and the above MAR estimates are subject to selection bias due to nonignorable nonresponse. The ISNI functions (specifically the `isniglm` function for this example) can be applied to  evaluate the rate of change of model estimates in the neighborhood of the MAR model where the missingness probability is allowed to depend on the unobserved value of `sexact`, even after conditioning on the other missingness predictors in `s`.
+
+A simple ISNI analysis can be conducted using the `isniglm` function as follows: 
+
+```{r}
+sos.isni<-isniglm(ymodel, family=binomial, data=sos)
+sos.isni
+```
+The `summary` function in the package expresses the `isniglm()` object: 
+```{r}
+ summary(sos.isni)
+```
+
+The columns ``MAR Est.`` and ``Std. Err`` denote the logistic model estimates and their standard errors under MAR; ``ISNI`` and ``c`` denote ISNI values and `c` statistics.   Recall that ISNI denotes the approximate change in the MLEs when $\gamma_1$ in the selection model is changed from $0$ to $1$. Under our nonignorable selection model, assuming that $\gamma_1=1$ means that a student whose answer is ``yes`` has an increase of 2.7-fold in the odds of nonresponse.  Thus, subjects whose true value is ``yes`` would be more likely to have a missing value, and the naive MAR estimate for `(Intercept)` should be less than the `(Intercept)` estimate under the correct nonignorable model. The positive sign of the ISNI value for `(Intercept)` is consistent with this prediction. The ISNI for the `faculty` predictor is $-0.17$, indicating that if, as is more plausible here, $\gamma_1 = 1$, the MLE for the estimate should change from $-0.73$ to $-0.90$.  If  $\gamma_1 = -1$, the estimate would change from $-0.73$ to $-0.56$.
+
+The column `c`  presents the `c` statistics that approximate the minimum  magnitude of nonignorability that is needed for the change in an MLE to equal one standard error ($\text{SE}$). One can then assess sensitivity by evaluating whether this level of nonignorability is plausible.  For our `sos` example with a binary outcome, the $c$ statistic is defined  as 
+ \begin{eqnarray}
+c= \left| \frac{\text{SE} }{\text{ISNI}}\right|.
+ \end{eqnarray}
+ The $c$ statistic here informs us that in order for selection bias to be as large as the sampling error, the magnitude of nonignorability needs to be at least as large as that with which one-unit change in `sexact` is associated with an odds ratio of 2.7 in the probability of being missing. 
+ 
+When $c$ is large, only extreme nonignorability can make the estimate change substantially, and consequently sensitivity to nonignorability is of little concern. For example, $c=10$ implies that in order for the error in an MAR estimate to be the same size as its sampling error, the nonignorability needs to be strong enough that a $0.1$-unit change in `sexact` causes a significant change in the odds of being missing.   When $c$ is small, modest departure from MAR can cause the estimate to change substantially. For example, $c=0.1$ implies that when even a $10$-unit change in `sexact` causes a significant change in the odds of being missing, the estimate may change substantially. As such a degree of nonignorability is plausible in many applications, this small $c$ value signals sensitivity.  Prior research suggests $c<1$ as a rule of thumb to signal significant sensitivity.
+
+In the `sos` example, the $c$ statistics for `(Intercept)}` and `faculty` are both less than $1$, suggesting that these coefficients are sensitive to nonignorability, confirming previous findings.  Prior research also found that neither the `gender` nor the interaction term between `gender` and `faculty`  should be sensitive, as our findings using ISNI  confirm.
+
+
+
+## Two-equation model specification
+
+In the above we do not explicitly specify an missing data mechanism model (MDM) via `formula` argument in the `isniglm` function. The same analysis can be replicated by explicitly specifying an MDM model using the code below. The  two-equation formula below `sexact | is.na(sexact)  ~ gender*faculty | gender *faculty` uses the operator `|` to separately specify  variables used in the complete-data model and MDM. The two-equation formula means that  the  complete-data model is `sexact` $\sim$ `gender*faculty` and that  `is.na(sexact)` and `gender*faculty` are the missingness indicator  and the missingness predictor $s$ in the nonresponse  model described above, respectively.
+
+```{r}
+ygmodel <- sexact | is.na(sexact)  ~ gender*faculty | gender *faculty
+summary(isniglm(ygmodel, family=binomial, data=sos))
+```
+
+##  ISNI Analysis for Grouped Binomial Outcome
+
+Because all the covariates in \code{sos} are categorical variables, one can also analyze the data as a grouped binomial outcome using the `weight` argument as below. 
+
+```{r}
+ gender <- c(0,0,1,1,0,0,1,1)
+ faculty <- c(0,0,0,0,1,1,1,1)
+gender <- factor(gender, levels = c(0, 1), labels =c("male", "female"))
+faculty <- factor(faculty, levels = c(0, 1), labels =c("other", "mdv"))
+ SAcount <- c(NA, 1277, NA, 1247, NA, 126, NA, 152)
+ total  <- c(1189,1710,978,1657,68,215,73,246)
+sosgrp <- data.frame(gender=gender, faculty=faculty, SAcount=SAcount, total=total)
+ymodel <- SAcount/total ~gender*faculty
+ sosgrp.isni<-isniglm(ymodel, family=binomial, data=sosgrp, weight=total)
+summary(sosgrp.isni)
+```
+
+
+
+## A tutorial containing more technical background and examples for longitudinal data
+
+A tutorial describing the ISNI methodology  and containing examples for ISNI computation for  nonignorable missing data in longitudinal setting can be download
+([via](http://huixie.people.uic.edu/Research/ISNI_R_tutorial.pdf))

@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="author" content="Hui Xie" />
+
+<meta name="date" content="2018-04-03" />
+
+<title>isni</title>
+
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+</style>
+
+
+
+<link href="data:text/css;charset=utf-8,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23header%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%20code%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" rel="stylesheet" type="text/css" />
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">isni</h1>
+<h4 class="author"><em>Hui Xie</em></h4>
+<h4 class="date"><em>2018-04-03</em></h4>
+
+
+
+<p>The <code>isni</code> package provides functions to compute, print and summarize the Index of Sensitivity to Nonignorability (ISNI). One can compute the sensitivity index without estimating any nonignorable models or positing specific magnitude of nonignorability. Thus ISNI provides a simple quantitative assessment of how robust the standard estimates assuming missing at random is with respect to the assumption of ignorability. This vignette serves as a quick start for how to use the package. Currently the package provides ISNI computation for</p>
+<ul>
+<li>Generalized Linear Model (GLM) for independent data</li>
+<li>Marginal Multivariate Gaussian Model for longitudinal/clustered data</li>
+<li>linear mixed model for longitudinal/clustered data</li>
+</ul>
+<p>It allows for arbitrary patterns of missingness in the longitudinal regression outcomes caused by dropout and/or intermittent missingness.</p>
+<div id="the-sos-example" class="section level2">
+<h2>The <code>sos</code> example</h2>
+<p><code>sos</code> is dataset on a cross-sectional survey of sexual practices among students at the University of Edinburgh. The response variable is the students’ answer to the question ``Have you ever had sexual intercourse?’’. Because of the sensitivity of this question, many students declined to answer, leading to substantial missing data. We consider a simplified data set consisting of the answer to this question, with the student’s sex and faculty as predictors.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(isni)
+<span class="kw">data</span>(sos)
+sos[<span class="kw">sample</span>(<span class="kw">nrow</span>(sos),<span class="dv">10</span>),]</code></pre></div>
+<pre><code>##      sexact gender faculty
+## 2478   &lt;NA&gt;   male   other
+## 4819     no female   other
+## 1531     no   male   other
+## 3277    yes female   other
+## 5626   &lt;NA&gt; female   other
+## 5434   &lt;NA&gt; female   other
+## 3977    yes female   other
+## 3997    yes female   other
+## 4296    yes female   other
+## 3077     no   male     mdv</code></pre>
+<p>The R code above loads the library <code>isni</code> and the data frame <code>sos</code>, displaying a random subsample of <span class="math inline">\(10\)</span> records. <code>sos</code> includes the following factor variables: <code>sexact</code> is the response to the question <code>Have you ever had sexual intercourse?</code> (two levels: no (reference level), yes); <code>gender</code> is the student’s sex (two levels: male (reference level), female); <code>faculty</code> is the student’s faculty (medical/dental/veterinary, all other faculty categories (reference level)).</p>
+<p>Assuming ignorable nonresponse, one can fit a logistic model (using responders only) to predict the outcome by sex, faculty and their interaction. We estimated the model with function :</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">ymodel=<span class="st"> </span>sexact  <span class="op">~</span><span class="st"> </span>gender<span class="op">*</span>faculty
+<span class="kw">summary</span>(<span class="kw">glm</span>(ymodel,<span class="dt">family=</span>binomial, <span class="dt">data=</span>sos))</code></pre></div>
+<pre><code>## 
+## Call:
+## glm(formula = ymodel, family = binomial, data = sos)
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -1.6713  -1.3282   0.7540   0.7642   1.0338  
+## 
+## Coefficients:
+##                         Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept)              1.08153    0.05561  19.448  &lt; 2e-16 ***
+## genderfemale             0.03081    0.07958   0.387    0.699    
+## facultymdv              -0.73389    0.14921  -4.918 8.73e-07 ***
+## genderfemale:facultymdv  0.10213    0.20670   0.494    0.621    
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 4450.3  on 3827  degrees of freedom
+## Residual deviance: 4408.2  on 3824  degrees of freedom
+##   (2308 observations deleted due to missingness)
+## AIC: 4416.2
+## 
+## Number of Fisher Scoring iterations: 4</code></pre>
+The estimates show that students in a medical faculty were less likely to report having had sexual intercourse. Because only 62.4% responded to the sexual practice question, there is concern that this analysis is sensitive to the assumption of ignorability. For this purpose one can conduct an ISNI analysis for this model with the function <code>isniglm()</code>. We posit a nonignorable nonresponse model in the following form
+<span class="math display">\[\begin{eqnarray}
+logit (Prob(is.na(sexact)=``yes''))=\gamma_{0}^T s +\gamma_1*sexact 
+\end{eqnarray}\]</span>
+<p>where the observed missingness predictor <code>s</code> including <code>gender</code>, <code>faculty</code> and their interaction. In the above nonresponse model, the probability of nonresponse to the sexual practice question is associated with the observed missingness predictor <code>s</code> via the parameter <span class="math inline">\(\gamma_0\)</span> and is associated with the partially missing outcome <code>sexact</code> via the parameter <span class="math inline">\(\gamma_1\)</span>. The nonignorable parameter <span class="math inline">\(\gamma_1\)</span> captures the mangnitude and nature of nonignrable missingness. When <span class="math inline">\(\gamma_1=0\)</span>, the nonresponse becomes ignorable in the sense that the probability of missingness is indepdent of unobserved values of <code>sexact</code>. The above MAR analysis provides consistent and valid estimates. When <span class="math inline">\(\gamma_1\)</span> departs from zero, the nonresponse becomes nonignorable and the above MAR estimates are subject to selection bias due to nonignorable nonresponse. The ISNI functions (specifically the <code>isniglm</code> function for this example) can be applied to evaluate the rate of change of model estimates in the neighborhood of the MAR model where the missingness probability is allowed to depend on the unobserved value of <code>sexact</code>, even after conditioning on the other missingness predictors in <code>s</code>.</p>
+<p>A simple ISNI analysis can be conducted using the <code>isniglm</code> function as follows:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">sos.isni&lt;-<span class="kw">isniglm</span>(ymodel, <span class="dt">family=</span>binomial, <span class="dt">data=</span>sos)</code></pre></div>
+<pre><code>## # weights:  5 (4 variable)
+## initial  value 4253.151100 
+## final  value 4027.954580 
+## converged</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">sos.isni</code></pre></div>
+<pre><code>## 
+## Call:
+## isniglm(formula = ymodel, family = binomial, data = sos)
+## 
+## ISNIs:
+##             (Intercept)             genderfemale               facultymdv  
+##                0.410141                -0.038983                -0.169859  
+## genderfemale:facultymdv  
+##                0.027542  
+## 
+## c statistics:
+##             (Intercept)             genderfemale               facultymdv  
+##                 0.13559                  2.04146                  0.87846  
+## genderfemale:facultymdv  
+##                 7.50482</code></pre>
+<p>The <code>summary</code> function in the package expresses the <code>isniglm()</code> object:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"> <span class="kw">summary</span>(sos.isni)</code></pre></div>
+<pre><code>## 
+## Call:
+## isniglm(formula = ymodel, family = binomial, data = sos)
+## 
+##                          MAR Est.  Std. Err      ISNI      c
+## (Intercept)              1.081531  0.055611  0.410141 0.1356
+## genderfemale             0.030808  0.079583 -0.038983 2.0415
+## facultymdv              -0.733886  0.149215 -0.169859 0.8785
+## genderfemale:facultymdv  0.102133  0.206696  0.027542 7.5048</code></pre>
+<p>The columns <code>MAR Est.</code> and <code>Std. Err</code> denote the logistic model estimates and their standard errors under MAR; <code>ISNI</code> and <code>c</code> denote ISNI values and <code>c</code> statistics. Recall that ISNI denotes the approximate change in the MLEs when <span class="math inline">\(\gamma_1\)</span> in the selection model is changed from <span class="math inline">\(0\)</span> to <span class="math inline">\(1\)</span>. Under our nonignorable selection model, assuming that <span class="math inline">\(\gamma_1=1\)</span> means that a student whose answer is <code>yes</code> has an increase of 2.7-fold in the odds of nonresponse. Thus, subjects whose true value is <code>yes</code> would be more likely to have a missing value, and the naive MAR estimate for <code>(Intercept)</code> should be less than the <code>(Intercept)</code> estimate under the correct nonignorable model. The positive sign of the ISNI value for <code>(Intercept)</code> is consistent with this prediction. The ISNI for the <code>faculty</code> predictor is <span class="math inline">\(-0.17\)</span>, indicating that if, as is more plausible here, <span class="math inline">\(\gamma_1 = 1\)</span>, the MLE for the estimate should change from <span class="math inline">\(-0.73\)</span> to <span class="math inline">\(-0.90\)</span>. If <span class="math inline">\(\gamma_1 = -1\)</span>, the estimate would change from <span class="math inline">\(-0.73\)</span> to <span class="math inline">\(-0.56\)</span>.</p>
+The column <code>c</code> presents the <code>c</code> statistics that approximate the minimum magnitude of nonignorability that is needed for the change in an MLE to equal one standard error (<span class="math inline">\(\text{SE}\)</span>). One can then assess sensitivity by evaluating whether this level of nonignorability is plausible. For our <code>sos</code> example with a binary outcome, the <span class="math inline">\(c\)</span> statistic is defined as
+<span class="math display">\[\begin{eqnarray}
+c= \left| \frac{\text{SE} }{\text{ISNI}}\right|.
+ \end{eqnarray}\]</span>
+<p>The <span class="math inline">\(c\)</span> statistic here informs us that in order for selection bias to be as large as the sampling error, the magnitude of nonignorability needs to be at least as large as that with which one-unit change in <code>sexact</code> is associated with an odds ratio of 2.7 in the probability of being missing.</p>
+<p>When <span class="math inline">\(c\)</span> is large, only extreme nonignorability can make the estimate change substantially, and consequently sensitivity to nonignorability is of little concern. For example, <span class="math inline">\(c=10\)</span> implies that in order for the error in an MAR estimate to be the same size as its sampling error, the nonignorability needs to be strong enough that a <span class="math inline">\(0.1\)</span>-unit change in <code>sexact</code> causes a significant change in the odds of being missing. When <span class="math inline">\(c\)</span> is small, modest departure from MAR can cause the estimate to change substantially. For example, <span class="math inline">\(c=0.1\)</span> implies that when even a <span class="math inline">\(10\)</span>-unit change in <code>sexact</code> causes a significant change in the odds of being missing, the estimate may change substantially. As such a degree of nonignorability is plausible in many applications, this small <span class="math inline">\(c\)</span> value signals sensitivity. Prior research suggests <span class="math inline">\(c&lt;1\)</span> as a rule of thumb to signal significant sensitivity.</p>
+<p>In the <code>sos</code> example, the <span class="math inline">\(c\)</span> statistics for <code>(Intercept)}</code> and <code>faculty</code> are both less than <span class="math inline">\(1\)</span>, suggesting that these coefficients are sensitive to nonignorability, confirming previous findings. Prior research also found that neither the <code>gender</code> nor the interaction term between <code>gender</code> and <code>faculty</code> should be sensitive, as our findings using ISNI confirm.</p>
+</div>
+<div id="two-equation-model-specification" class="section level2">
+<h2>Two-equation model specification</h2>
+<p>In the above we do not explicitly specify an missing data mechanism model (MDM) via <code>formula</code> argument in the <code>isniglm</code> function. The same analysis can be replicated by explicitly specifying an MDM model using the code below. The two-equation formula below <code>sexact | is.na(sexact)  ~ gender*faculty | gender *faculty</code> uses the operator <code>|</code> to separately specify variables used in the complete-data model and MDM. The two-equation formula means that the complete-data model is <code>sexact</code> <span class="math inline">\(\sim\)</span> <code>gender*faculty</code> and that <code>is.na(sexact)</code> and <code>gender*faculty</code> are the missingness indicator and the missingness predictor <span class="math inline">\(s\)</span> in the nonresponse model described above, respectively.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">ygmodel &lt;-<span class="st"> </span>sexact <span class="op">|</span><span class="st"> </span><span class="kw">is.na</span>(sexact)  <span class="op">~</span><span class="st"> </span>gender<span class="op">*</span>faculty <span class="op">|</span><span class="st"> </span>gender <span class="op">*</span>faculty
+<span class="kw">summary</span>(<span class="kw">isniglm</span>(ygmodel, <span class="dt">family=</span>binomial, <span class="dt">data=</span>sos))</code></pre></div>
+<pre><code>## # weights:  5 (4 variable)
+## initial  value 4253.151100 
+## final  value 4027.954580 
+## converged
+## 
+## Call:
+## isniglm(formula = ygmodel, family = binomial, data = sos)
+## 
+##                          MAR Est.  Std. Err      ISNI      c
+## (Intercept)              1.081531  0.055611  0.410141 0.1356
+## genderfemale             0.030808  0.079583 -0.038983 2.0415
+## facultymdv              -0.733886  0.149215 -0.169859 0.8785
+## genderfemale:facultymdv  0.102133  0.206696  0.027542 7.5048</code></pre>
+</div>
+<div id="isni-analysis-for-grouped-binomial-outcome" class="section level2">
+<h2>ISNI Analysis for Grouped Binomial Outcome</h2>
+<p>Because all the covariates in  are categorical variables, one can also analyze the data as a grouped binomial outcome using the <code>weight</code> argument as below.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"> gender &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">1</span>)
+ faculty &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>)
+gender &lt;-<span class="st"> </span><span class="kw">factor</span>(gender, <span class="dt">levels =</span> <span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="dt">labels =</span><span class="kw">c</span>(<span class="st">&quot;male&quot;</span>, <span class="st">&quot;female&quot;</span>))
+faculty &lt;-<span class="st"> </span><span class="kw">factor</span>(faculty, <span class="dt">levels =</span> <span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="dt">labels =</span><span class="kw">c</span>(<span class="st">&quot;other&quot;</span>, <span class="st">&quot;mdv&quot;</span>))
+ SAcount &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="ot">NA</span>, <span class="dv">1277</span>, <span class="ot">NA</span>, <span class="dv">1247</span>, <span class="ot">NA</span>, <span class="dv">126</span>, <span class="ot">NA</span>, <span class="dv">152</span>)
+ total  &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">1189</span>,<span class="dv">1710</span>,<span class="dv">978</span>,<span class="dv">1657</span>,<span class="dv">68</span>,<span class="dv">215</span>,<span class="dv">73</span>,<span class="dv">246</span>)
+sosgrp &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">gender=</span>gender, <span class="dt">faculty=</span>faculty, <span class="dt">SAcount=</span>SAcount, <span class="dt">total=</span>total)
+ymodel &lt;-<span class="st"> </span>SAcount<span class="op">/</span>total <span class="op">~</span>gender<span class="op">*</span>faculty
+ sosgrp.isni&lt;-<span class="kw">isniglm</span>(ymodel, <span class="dt">family=</span>binomial, <span class="dt">data=</span>sosgrp, <span class="dt">weight=</span>total)</code></pre></div>
+<pre><code>## # weights:  5 (4 variable)
+## initial  value 4253.151100 
+## final  value 4027.954580 
+## converged</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summary</span>(sosgrp.isni)</code></pre></div>
+<pre><code>## 
+## Call:
+## isniglm(formula = ymodel, family = binomial, data = sosgrp, weights = total)
+## 
+##                          MAR Est.  Std. Err      ISNI      c
+## (Intercept)              1.081531  0.055611  0.410141 0.1356
+## genderfemale             0.030808  0.079583 -0.038983 2.0415
+## facultymdv              -0.733886  0.149215 -0.169859 0.8785
+## genderfemale:facultymdv  0.102133  0.206696  0.027542 7.5048</code></pre>
+</div>
+<div id="a-tutorial-containing-more-technical-background-and-examples-for-longitudinal-data" class="section level2">
+<h2>A tutorial containing more technical background and examples for longitudinal data</h2>
+<p>A tutorial describing the ISNI methodology and containing examples for ISNI computation for nonignorable missing data in longitudinal setting can be download (<a href="http://huixie.people.uic.edu/Research/ISNI_R_tutorial.pdf">via</a>)</p>
+</div>
+
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

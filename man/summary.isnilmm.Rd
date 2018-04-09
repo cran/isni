@@ -4,10 +4,13 @@
 \alias{summary.isnilmm}
 \title{Function to print out a summary of isnilmm  object in a matrix form.}
 \usage{
-\method{summary}{isnilmm}(object, ...)
+\method{summary}{isnilmm}(object, digits = max(3, getOption("digits") - 2),
+  ...)
 }
 \arguments{
-\item{object}{the isnilmm object obtained from the isnigls function}
+\item{object}{the isnilmm object obtained from the isnilmm function}
+
+\item{digits}{the number of significant digits to use when printing}
 
 \item{...}{additional arguements}
 }

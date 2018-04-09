@@ -1,13 +1,3 @@
-##install.packages("nlme")
-##install.packages("mvtnorm")
-##install.packages("nnet")
-##install.packages("numDeriv")
-
-library(nlme)
-library(mvtnorm)
-library(nnet)
-library(numDeriv)
-
 #' A data set for Psychiatric Drug Treatment
 #'
 #' The variables are as follows:
@@ -39,14 +29,14 @@ NULL
 #' \itemize{
 #'  \item id: patients id
 #'  \item y: EF score
-#'  \item time: time in months since randomization
+#'  \item time: time in months since randomization. 
 #'  \item group: placebo (0) or flutamide (1)
 #'  \item perf: baseline performance score
 #'  \item sever: baseline disease severity
-#'  \item t1: indicator variable for month 1
-#'  \item t3: indicator variable for month 3
-#'  \item t6: indicator variable for month 6
-#'  \item yp: most recently observed  prior outcome
+##  \item t1: indicator variable for month 1
+##  \item t3: indicator variable for month 3
+##  \item t6: indicator variable for month 6
+#  \item yp: most recently observed  prior outcome
 #'  \item basey: EF at baseline
 #'  \item g: missingness status ("O"=observed, "D"=dropout, "I"=intermittent missingness)
 #'  \item gp: missingness status in the prior visit ("O"=observed, "D"=dropout, "I"=intermittent missingness, "U"=undefined)
@@ -56,162 +46,281 @@ NULL
 #' @keywords datasets
 #' @name qolef
 #' @usage data(qolef)
-#' @format A data frame with 2860 rows and 13 variables
+#' @format A data frame with 2860 rows and 10 variables
 NULL
 
-#' Function for ISNI computation when the outcome follows GLS.
+#' Function for ISNI computation when the outcome follows marginal multivariate Gaussian Models.
 #'
-#' Calculate the ISNI when the regression outcome is subject to missingness and follows generalized linear models (GLMs)
-#' @param ymodel an object of class "formula": a symbolic description of the model to be fitted for the outcome
-#' @param gmodel an object of class "formula": a symbolic description of the selection model to be fitted for the missingness indictor g
-#' @param ycorr  the form of within-subject correlation structure.
+#' Calculate the ISNI when the regression outcome is subject to missingness and follows marginal multivaraite Gaussian models.
+#' @param formula an object of class "Formula": a symbolic description of the models to be fitted for the outcome and missingness status variable.  
+#'                The details of model specification are given under "Details".  
+#' @param data  the name of data frame containing all the variables in the model and all the observations including those intended to be collected 
+#'              but became missing.
+## @param gmodel an object of class "formula": a symbolic description of the selection model to be fitted for the missingness indictor g
+#' @param cortype  the type of within-subject correlation structure.
+#' @param id the name of variable for the level-2 clustering variable. 
+#' @param subset an optional vector specifying a subset of observations to be used in the fitting process for the outcome model and the missingness mechanism model.
+#' @param weights frequency weights to be assigned to each \code{id}. when supplied, indicates differential weights are used; otherwise each \code{id} is weighted equally.  
 #' @param predprobobs Null if using buil-in multinomial transitional logistic model to obtain predicted probabilities of being observed;
-#'                    otherwise user supply a vector of these probabilities for all the observations in alldata.
+#'                    otherwise user supply the name of the variable in \code{data} that gives these probabilities for all the observations in the data.
 #' @param misni  FALSE if using the default approach to computing ISNI with a scalar nonignorability parameter; 
 #'               TRUE when computing ISNI with multiple nonignorability parameters.
-#' @param alldata  the name of data frame containing all the variables in the model and all the observations including those intended to be collected 
-#'              but became missing.
-#' @name isnigls
-#' @aliases isnigls
-#' @import  matrixcalc mvtnorm nlme nnet numDeriv stats
-#' @export
-#' @examples
-#' ymodel= y~   t1+t3+t6 + group  + t12 + t32+t62 + perf + sever
-#' gmodel= as.factor(g)~ t3+t6+group+yp+perf+sever
-#' qolef$t12<-qolef$t1*qolef$group
-#' qolef$t32<-qolef$t3*qolef$group
-#' qolef$t62<-qolef$t6*qolef$group
+#' @details The ISNI analysis is based on a joint selection model and requires specifying two model equations: the complete-data model and the missing data mechanism model.
+#'        To specify the variables in the models that are required for computing the isni measures, we make use of the  \code{R} package "Formula"  designed for handling model
+#'        equations with multiple responses    and multiple sets of predictors . At a minimum, the user should supply a single-equation 
+#'         in the typical form:  \code{response} ~ \code{Xterms} where \code{response} is the (numeric or factor) vector for the outcome of interest and \code{Xterms} 
+#'        is a series of terms, separated by + operators, which specify a linear predictor for response. With the signle-equation specification, the \code{isniglm} function 
+#'        will by default use the utility function \code{definemissingstatus} provided in the package to generate the 
+#'        missingness status variables at the current and prior visits and then use \code{Xterms} as the observed missingness predictors for fitting a first-order transitional missing data model. 
+#'        It is important to sort within-\code{id} observations  by time so that the missingness status variables can be defined correctly in this default setting.  The \code{isnimgm} then computes the MAR estimates and conducts ISNI computation
+#'        to evaluate the rate of change of model estimates in the neighborhood of the MAR model where the missingness probability is allowed to depend on the unobserved value 
+#'        of \code{response},   even after  conditioning on the other  missingness predictors. 
 #'
-#' qolef.isni=isnigls(ymode=ymodel, gmodel=gmodel, alldata=qolef)
+#'        The above single-equation formula specification uses the same set of predictors for the outcome model and the missing data mechanism model for computing ISNI. 
+#'        To use different sets of predictors, one can explicitly specifiy a two-equation formula as: \code{response} | \code{miss + missprior} ~ \code{Xterms} |  \code{Sterms},
+#'        which specifies the formula  for the outcome model as \code{response} ~ \code{Xterms} and that for the missing data mechanism model as \code{miss + missprior} ~ \code{Sterms}, 
+#'        where \code{Xterms} and the observed missingness predictors \code{Sterms} can be different, \code{miss} and \code{missprior} are the variable names in \code{data} denoting the missingness status at the 
+#'        current and prior visits, respectively.  
+#' @name isnimgm
+#' @aliases isnimgm
+#' @import  matrixcalc mvtnorm nlme nnet  stats Formula
+#' @importFrom nlme corCompSymm
+#' @export isnimgm
+#' @examples
+#' models= y | g+gp ~   as.factor(time) * group + perf + sever |
+#'        as.factor(time) * group + yp+ perf + sever
+## gmodel= as.factor(g)~ t3+t6+group+yp+perf+sever
+## qolef$t12<-qolef$t1*qolef$group
+## qolef$t32<-qolef$t3*qolef$group
+## qolef$t62<-qolef$t6*qolef$group
+##
+#' qolef.isni=isnimgm(models, data=qolef, id=id)
 #' summary(qolef.isni)
 #'
-isnigls = function(ymodel, gmodel, ycorr='CS', predprobobs=NULL, misni=FALSE, alldata) {
-  ## Calculate ISNI in a generalized linear model with outcome y, a vector of
-  ## predictors x, complete-data indicator g and the distribution family.
-  ## This formulation only allows missing data in the outcome vector y.
+## ymodel= y | g+gp ~   t1+t3+t6 + group  + t12 + t32+t62 + perf + sever | t3+t6+group+yp+perf+sever
+## summary(isnimgm(ymodel, data=qolef, id=id))
+#'
+isnimgm = function(formula, data, cortype="CS", id, subset, weights, predprobobs, misni=FALSE) {
+  
 
-  ymodel.data<-model.frame(ymodel,data=alldata,na.action=NULL)
-  x<- as.matrix(model.matrix(ymodel, data=ymodel.data))
-  y<- as.vector(model.extract(ymodel.data, "response"))
-  sdy= sd(y,na.rm=T)
-  maxT = max(table(alldata$id))
 
-  ##gmodel.data<-model.frame(gmodel,data=alldata,na.action=NULL)
-  ##s<- as.matrix(model.matrix(gmodel, data=gmodel.data))
-  ##g<- as.vector(model.extract(gmodel.data, "response"))
-  ##names(gmodel.data)[1]="g"
+  ## (1) process the call and set up model frame.
+  cl <- match.call()
+  if (missing(data))  data <- environment(formula)
+  if (missing(id)) stop("Users need to supply the name of the level-2 clusting variable in the data via the argument id.")
+  
+  mf <- match.call(expand.dots = FALSE)    
+  m <- match(c("formula", "data", "weights", "subset", "id","predprobobs"), names(mf), 0L)
+  mf <- mf[c(1L, m)]
+  f <- Formula(formula)
+  if (any(length(f)>2)) stop("Cannot have more than two models") 
+  mf$formula <- f
+  options(na.action=na.pass)
+  mf[[1L]] <- as.name("get_all_vars")
+  mfvar<- eval(mf, parent.frame())
+  if (!missing(subset)) {
+    SubSet <-mfvar$subset
+    mfvar <-mfvar[SubSet,]
+                          }
+  mf[[1L]] <- as.name("model.frame")
+  mf <- eval(mf, parent.frame())
+  ID= model.extract(mf, "id")
 
-  ## fit the GLS with the observed data.
-  if (ycorr=="CS")  iggls= gls(ymodel, data=alldata,correlation = corCompSymm(form =  ~ 1 | id), na.action=na.exclude)
-  if (ycorr=="AR1") iggls= gls(ymodel, data=alldata,correlation = corAR1(form =  ~ 1 | id), na.action=na.exclude)
-  if (ycorr=="UN")  iggls= gls(ymodel, data=alldata,correlation = corSymm(form =  ~ 1 | id), na.action=na.exclude)
+  if (missing(weights)) WTs <- NULL else 
+         WTs <- model.extract(mf, "weights")
+  if (!is.null(WTs) && !is.numeric(WTs)) 
+        stop("'weights' must be a numeric vector")
+  if (!is.null(WTs) && any(WTs < 0)) 
+        stop("negative weights not allowed")
+  if (is.null(WTs)){
+        IWT <- 0 
+        WTs <- rep(1, nrow(mf))
+    }
+  isni_WTs <- isni_id <- isni_outcome_ <- NULL 
+  mf= cbind(mf, mfvar[!(names(mfvar) %in% names(mf))],  isni_id=ID, isni_WTs=WTs)  
+  if (! missing(predprobobs))   mf$fitprobs_=  model.extract(mf, "predprobobs")  
 
+
+  ##(2) Extract responses and predictors from the model frame
+  ymodel=formula(f, lhs=1, rhs=1)
+  x<- as.matrix(model.matrix(f, data=mf, rhs=1))
+  y<- model.part(f,data=mf, lhs=1)[,1]  ## will be a vector
+  if (nrow(x)<1)  print("No predictor variables specified for the outcome")
+  options(na.action=na.omit)
+
+  ## check if the missing status indicator g and gp are specified, if not add g and gp in the lhs of formula
+  if (length(f)[1]==1) {
+     cat("\n NOTE: The model formula specification does not include  the missingness status variables at the current and the prior visits. 
+       The program will assume that data has already been sorted by the time variable within each level-2 ID variable and proceed to create the missingness status variables and then fit a transitional missingness mechanism model. \n")
+     f <- update(f, .| g_ +gp_ ~.)
+     mf <- cbind(mf, isni_outcome_=y)
+     mf <- definemissingstatus(data=mf, id=isni_id, y=isni_outcome_) 
+     if (ncol(model.part(f,data=mf, lhs=2)) != 2) stop("The missing data model should be in the form of g+gp ~ Sterm") 
+       }
+  gmodel <- formula(f, lhs=2,rhs=length(f)[2])
+
+  ## ## Drop all observations with missing values in predictor matrix X to avoid NAs in ISNI computation.  
+  missX<- apply(x, 2, FUN=function (u) any(is.na(u)))
+  if (any(missX)) cat(paste("\n Note: There are missing values in fixed-effect outcome predictors-- ", paste(dimnames(x)[[2]][missX], collapse=" "), ". Observations with missing values in these predictors will be dropped out from computing ISNI, 
+       which may reduce ISNI values if the outcome is missing concurrently. Alternatively one can impute these missing predictors values and re-compute ISNI. ", sep=""))
+  missX  <- apply(x, 1, FUN=function (u) any(is.na(u)))
+  WTs=WTs[!missX]
+  mf=mf[!missX,,drop=F]
+  options(na.action=na.pass) 
+  x<- as.matrix(model.matrix(f, data=mf, rhs=1))
+  y<- model.part(f,data=mf, lhs=1)[,1]  
+  xomit <-  as.matrix(model.matrix(f, data=mf[!is.na(y), ], rhs=1))
+  if (ncol(x) != ncol(xomit)) {
+        cat(paste("\n All variable names in fixed-effects design matrix of ISNI analysis including observations with missing outcomes: \n", paste (dimnames(x)[[2]], collapse=" ")))
+        cat(paste("\n All variable names in fixed-effects design matrix of the MAR model excluding observations with missing outcomes:  \n", paste (dimnames(xomit)[[2]], collapse=" ")))
+        stop("\n The design matrix for the MAR model and ISNI analysis are different as shown above. Please modify your model formula specification, e.g. avoiding using as.factor function
+               in model formula.  ")
+     }    
+  options(na.action=na.omit)
+  maxT = max(table(mf$isni_id))
+  sdy <- sd(y,na.rm=T)  
+
+ 
+
+  ## fit the mgm with the observed data.
+  if (cortype=="CS")  iggls= gls(ymodel, data=mf,correlation = corCompSymm(form =  ~ 1 | isni_id), weights=~1/isni_WTs, na.action=na.exclude) else
+  if (cortype=="AR1") iggls= gls(ymodel, data=mf,correlation = corAR1(form =  ~ 1 | isni_id), weights=~1/isni_WTs, na.action=na.exclude) else
+  if (cortype=="UN")  iggls= gls(ymodel, data=mf,correlation = corSymm(form =  ~ 1 | isni_id), weights=~1/isni_WTs, na.action=na.exclude) else
+  stop ("This Type of correlation is not implmented yet for ISNI computation")
 
 
   ##  fit a missing data model to obtain fitted probabilities for being observed.
-  if (is.null(predprobobs)) {
-    if (!("g" %in% names(alldata)))  stop("A variable called 'g' for missing data status should be supplied in the data")
-    if (!("gp" %in% names(alldata)))  stop("A variable called 'gp' for missing data status for the prior visit should be supplied in the data")
-    alldata.mdm= fun.gfit(alldata, gmodel)
-    alldata$fitprobs=alldata.mdm$obsprob 
-    alldata$A10= alldata.mdm$A10;  alldata$A20= alldata.mdm$A20;  alldata$A11= alldata.mdm$A11
-    ##Afit=cbind(alldata$A10, alldata$A20, alldata$A11)
-  } else {
-    if (!is.null(predprobobs) & misni==T) stop("predprobobs needs to to a matrix to obtain ISNI vector for multiple nonignorability parameter")
-    if (!is.vector(predprobobs)) stop("predprobobs should be a vector")
-    if (nrow(alldata) != length(predprobobs)) stop ("The length of predprobobs should equal the number of observations in alldata")
-    alldata$fitprobs=predprobobs
-  }
-
-  if (ycorr=="CS")  D=list(sigma=iggls$sigma, rho=intervals(iggls)$corStruct[,"est."])
-  if (ycorr=="AR1") D=list(sigma=iggls$sigma, rho=intervals(iggls)$corStruct[,"est."])
-  if (ycorr=="UN")  D=list(sigma=iggls$sigma, rho=intervals(iggls)$corStruct[,"est."])
-
+  if (missing(predprobobs)) {
+    mf.mdm= tmdm(gmodel, data=mf)
+    mf$fitprobs=mf.mdm$obsprob 
+    mf$A10= mf.mdm$A10;  mf$A20= mf.mdm$A20;  mf$A11= mf.mdm$A11
+  } else  if ( misni==T) 
+     stop("predprobobs needs to to a matrix to obtain ISNI vector for multiple nonignorability parameter")
+  
+ 
+  D=list(sigma=iggls$sigma, rho=intervals(iggls)$corStruct[,"est."])
   b<- iggls$coef
   nb = length(b)
   nD=length(D$sigma)+length(D$rho)
   npar= nb + nD
 
-  uid = unique(alldata$id)
-
+  uid = unique(mf$isni_id)
   nabla12=matrix(0, nrow=npar, ncol=3)
-
-  ## compute nabla11
+  ## compute nabla11 and nabla12
   nabla11=matrix(0, nrow=npar, ncol=npar)
   for (i in 1:length(uid)) {
-    xi= as.matrix(x[alldata$id==uid[i],,drop=F])
-    yi= y[alldata$id==uid[i]]
-    nabla11=nabla11+ fun.glssubi(yi=yi,xi=xi,maxT=maxT, b=b,D=D, ycorr=ycorr, transform=FALSE, case=1)
+    xi= as.matrix(x[mf$isni_id==uid[i],,drop=F])
+    yi= y[mf$isni_id==uid[i]]
+    nabla11=nabla11+ fun.mgmsubi(yi=yi,xi=xi,maxT=maxT, b=b,D=D, cortype=cortype, transform=FALSE, case=1)
     gfiti= NULL; Afiti=NULL
-    if (!is.null(predprobobs))  gfiti= alldata$fitprobs[alldata$id==uid[i]]
-    else Afiti= cbind(alldata$A10[alldata$id==uid[i]], alldata$A20[alldata$id==uid[i]], alldata$A11[alldata$id==uid[i]])
-    if (any(is.na(yi))) nabla12 = nabla12 + fun.glssubi(yi=yi,xi=xi,maxT=maxT, b=b,D=D, ycorr=ycorr, transform=FALSE, gfiti=gfiti,Afiti=Afiti, case=2)
+    if (! missing(predprobobs))  gfiti= mf$fitprobs_[mf$isni_id==uid[i]]
+    else Afiti= cbind(mf$A10[mf$isni_id==uid[i]], mf$A20[mf$isni_id==uid[i]], mf$A11[mf$isni_id==uid[i]])
+    if (any(is.na(yi))) nabla12 = nabla12 + fun.mgmsubi(yi=yi,xi=xi,maxT=maxT, b=b,D=D, cortype=cortype, transform=FALSE, gfiti=gfiti,Afiti=Afiti, case=2)
   }
-  ##nabla12=apply(nabla12,2,sum)
   isni=-solve(nabla11)%*%nabla12
-
 
   se=sqrt(diag(solve(-nabla11)))
   bD= c(b,unlist(D))
-  if (ycorr=="CS" | ycorr=="AR1" ) {
+  if (cortype=="CS" | cortype=="AR1" ) {
   names(bD)=c(names(b), names(D))
                                    } else
-  if (ycorr=="UN" )                {
+  if (cortype=="UN" )                {
   names(bD)=c(names(b), 'sigma', names(D[[2]]))
-                                   }
+                             }
   if (misni==FALSE) {
        isni=apply(isni,1, sum); senstran<-abs((sdy*se)/isni)
    } else
    {
        isni=apply(abs(isni),1, sum); senstran<-abs((sdy*se)/isni)
    }
-  res=list(coef=bD,se=se,isni=c(isni),c=c(senstran))
-  class(res) = c(res$class, "isnigls")
-  res
+
+  res=list(coefficients=bD,se=se,isni=c(isni),c=c(senstran), call=cl)
+  class(res) = c(res$class, "isnimgm")
+  return(res)
 }
 
-## Function to print out ISNIGLS, the index of sensitivity to
-## nonignorability, in a generalized least sqaure model.
-##
-#' Function to print out a summary of isnigls  object in a matrix form.
+
+
+#' Function to print out a summary of isnimgm  object in a matrix form.
 #'
-#' @param object the isniglm object obtained from the isnigls function
+#' @param object the isnimgm object obtained from the isnimgm function
+#' @param digits the number of significant digits to use when printing
 #' @param ... additional arguements
+#' @export summary.isnimgm
 #' @export
-#' @name summary.isnigls
-#' @aliases summary.isnigls
+#' @name summary.isnimgm
+#' @aliases summary.isnimgm
 
-summary.isnigls<-function(object, ...) {
+summary.isnimgm<-function(object, digits = max(3, getOption("digits") - 2), 
+            ...) {
 
-  if (class(object) != "isnigls")  stop('Invalid object class')
+  if (class(object) != "isnimgm")  stop('Invalid object class')
+  cat("\nCall:\n", paste(deparse(object$call), sep = "\n", 
+        collapse = "\n"), "\n\n", sep = "")
   ## Name the columns
-  isniname<-c('Est','SE','ISNI','c')
+  isniname<-c('MAR Est.','Std. Err','ISNI','c')
 
   ## Set up matrix to hold result
-  res1<-matrix(0,length(object$coef),length(isniname))
-  dimnames(res1)<-list(names(object$coef),isniname)
+  res<-matrix(0,length(object$coef),length(isniname))
+  dimnames(res)<-list(names(object$coef),isniname)
 
   for (i in 1:length(object$coef))
-    res1[i,]<- c(object$coef[i],object$se[i],object$isni[i],object$c[i])
-  print(res1)
+       res[i,]<- c(object$coef[i],object$se[i],object$isni[i],object$c[i])
+  printCoefmat(res, digits = digits,  cs.ind = 1:2)
 }
 
-#' Internal Function for various subject-level computation required for ISNIGLS.
-#'
-#' Calculate subject-level quantities when the regression outcome is subject to missingness and follows generalized least sqaures models (GLS)
-#' @param yi vector of the response for the ith subject
-#' @param xi matrix of the covariates for the ith subject
-#' @param maxT maximum number of visits
-#' @param b  the mean parameter vector beta
-#' @param D  the vector of unique parameters in the variance-covariance matrix for the error term in the GLS model for Y
-#' @param ycorr  the form of within-subject correlation structure in the GLS model for Y
-#' @param transform logical indicating wether or not the parameter in D is transformed.
-#' @param gfiti  vector of predicted probabilities of being observed for all the observations from the ith subject
-#' @param Afiti matrix of 3 columns of predicted transitional probabilities for the missing observations from the ith subject. 
-#' @param case   1: calculated nabla11_i; 2: calculate nabla12_i
-#' @aliases fun.glssubi
-#' @export
-fun.glssubi <- function ( yi, xi, maxT=maxT, b, D, ycorr,transform=FALSE, gfiti=NULL, Afiti=NULL,  case=1) {
+   
+    #' Function to print  the isnimgm object.
+    #'
+    #' \code{print} method for class isnimgm
+    #' @param x the isnimgm object obtained from the isnimgm function
+    #' @param digits the number of significant digits to use when printing
+    #' @param ... further arguments passed to or from other methods.
+    #'
+    #' @return The function print.isnimgm prints the model call, isni and c statistics from the isnimgm object.
+    #' @name print.isnimgm
+    #' @aliases print.isnimgm
+    #' @export print.isnimgm
+    #' @export
+    print.isnimgm<-function(x, digits = max(3, getOption("digits") - 2), ...) {
+
+     if (class(x) != "isnimgm")  stop('Invalid object class')
+     cat("\nCall:\n", paste(deparse(x$call), sep = "\n", 
+        collapse = "\n"), "\n\n", sep = "")
+     
+    
+     if (length(x$coef)>0) {
+        cat("ISNIs:\n")
+        print.default(format(x$isni, digits = digits), print.gap = 2L, 
+            quote = FALSE)
+        cat("\n")
+        cat("c statistics:\n")
+        print.default(format(x$c, digits = digits), print.gap = 2L, 
+            quote = FALSE)
+     }
+     else cat("No coefficients\n")
+     cat("\n")
+     invisible(x)
+    
+    }
+
+
+## Internal Function for various subject-level computation required for ISNIGLS.
+##
+## Calculate subject-level quantities when the regression outcome is subject to missingness and follows marginal multivaraite Gaussian Models. 
+## @param yi vector of the response for the ith subject
+## @param xi matrix of the covariates for the ith subject
+## @param maxT maximum number of visits
+## @param b  the mean parameter vector beta
+## @param D  the vector of unique parameters in the variance-covariance matrix for the error term in the GLS model for Y
+## @param correlation  the form of within-subject correlation structure in the GLS model for Y
+## @param transform logical indicating wether or not the parameter in D is transformed.
+## @param gfiti  vector of predicted probabilities of being observed for all the observations from the ith subject
+## @param Afiti matrix of 3 columns of predicted transitional probabilities for the missing observations from the ith subject. 
+## @param case   1: calculated nabla11_i; 2: calculate nabla12_i
+## @aliases fun.glssubi
+## @export
+fun.mgmsubi <- function ( yi, xi, maxT=maxT, b, D, cortype,transform=FALSE, gfiti=NULL, Afiti=NULL,  case=1) {
 
 
   ## output
@@ -233,16 +342,17 @@ fun.glssubi <- function ( yi, xi, maxT=maxT, b, D, ycorr,transform=FALSE, gfiti=
   npar= nb + nD
   sigma= D$sigma; rho=D$rho
  
+
   ## obtain the variance-covariance matrix
-  if (ycorr == "CS") {
+  if (cortype=="CS") {
     covyi= fun.csmat(sigma=sigma, rho=rho, obsi=length(yi),transform=transform, case=1)
   }
 
-  if (ycorr == "AR1") {
+  if (cortype=="AR1") {
     covyi= fun.ar1mat(sigma=sigma, rho=rho, obsi=length(yi),transform=transform, case=1)
   }
 
-  if (ycorr == "UN") {
+  if (cortype=="UN") {
     col=matrix(0, nrow=maxT, ncol=maxT)
     for (i in 1:(maxT-1)){
                           col[(i+1):maxT,i]=rho[((i-1)*maxT-i*(i-1)/2+1) : (i*maxT-i*(i+1)/2)]
@@ -260,7 +370,7 @@ fun.glssubi <- function ( yi, xi, maxT=maxT, b, D, ycorr,transform=FALSE, gfiti=
   if (case==1) {
     nabla11= matrix(0, npar, npar)
     nabla11[1:nb, 1:nb]=-t(xiobs)%*%icovyiobs%*%xiobs
-  if (ycorr == "CS") {
+  if (cortype=="CS") {
     covid1 = fun.csmat(sigma=sigma,rho=rho,obsi=niobs,transform=transform,case=2)
     covid2 = fun.csmat(sigma=sigma,rho=rho,obsi=niobs,transform=transform,case=3)
 
@@ -279,7 +389,7 @@ fun.glssubi <- function ( yi, xi, maxT=maxT, b, D, ycorr,transform=FALSE, gfiti=
     nabla11[(nb+1):npar, 1:nb]=nabla11[1:nb, (nb+1):(npar)]
     }
 
-  if (ycorr == "AR1") {
+  if (cortype=="AR1") {
     covid1 = fun.ar1mat(sigma=sigma,rho=rho,obsi=niobs,transform=transform,case=2)
     covid2 = fun.ar1mat(sigma=sigma,rho=rho,obsi=niobs,transform=transform,case=3)
     Ai= covid1
@@ -297,7 +407,7 @@ fun.glssubi <- function ( yi, xi, maxT=maxT, b, D, ycorr,transform=FALSE, gfiti=
     nabla11[(nb+1):npar, 1:nb]=nabla11[1:nb, (nb+1):(npar)]
  }
 
- if (ycorr == "UN") {
+ if (cortype=="UN") {
     covid1 = fun.generalmat(sigma=sigma,rho=rho2,obsi=obsi,transform=transform,case=2, case2=1)
     covid2 = fun.generalmat(sigma=sigma,rho=rho2,obsi=obsi,transform=transform,case=3)
     Ai= covid1
@@ -329,20 +439,21 @@ fun.glssubi <- function ( yi, xi, maxT=maxT, b, D, ycorr,transform=FALSE, gfiti=
         Afit0i=matrix(0, nrow=sum(misi==T), ncol=3)
         if (is.null(gfiti))  Afit0i =Afiti[misi, ,drop=F]
         else Afit0i[,1]= gfiti[misi]
+        
 
         cit = covyi[misi, obsi,drop=F]
 
         dmean.beta = t(ximis - cit %*% icovyiobs %*% xiobs) %*% Afit0i ## as.matrix(fitp0i)
-
+     
         dmean.D= matrix(0, nrow=nD, ncol=ncol(Afit0i)) ##numeric(nD)
 
-        if (ycorr== "CS") {
+        if (cortype=="CS") {
         derD= fun.csmat(sigma=sigma,rho=rho,obsi=length(yi),transform=transform,case=2)
                           } else
-        if (ycorr== "AR1") {
+        if (cortype=="AR1") {
         derD= fun.ar1mat(sigma=sigma,rho=rho,obsi=length(yi),transform=transform,case=2)
                            }              
-        if (ycorr== "UN") {
+        if  (cortype=="UN")  {
         derD= fun.generalmat(sigma=sigma,rho=rho2,obsi=length(yi),transform=transform,case=2, case2=2)
                           }
 
@@ -374,17 +485,17 @@ fun.glssubi <- function ( yi, xi, maxT=maxT, b, D, ycorr,transform=FALSE, gfiti=
 
 }
 
-#' Internal Function for generate compound symmetry matrix and its first and second derivatives wrt D
-#'
-#' Calculate the compound symmetry matrix and its first and second derivatives wrt D.
-#' @param sigma standard deviation
-#' @param rho correlation coefficient
-#' @param obsi dimension of the square matrix
-#' @param transform logical indicating wether or not the parameter in D is transformed.
-#' @param case   1: return nobs x nobs CS matrix; 2: return a list for first derivatives of the compound symmetry matrix wrt sigma and rho;
-#'               3: eturn an array containing 2nd derivatives of the compound symmetry matrix wrt sigma and rho.
-#' @aliases fun.csmat
-#' @export
+## Internal Function for generate compound symmetry matrix and its first and second derivatives wrt D
+##
+## Calculate the compound symmetry matrix and its first and second derivatives wrt D.
+## @param sigma standard deviation
+## @param rho correlation coefficient
+## @param obsi dimension of the square matrix
+## @param transform logical indicating wether or not the parameter in D is transformed.
+## @param case   1: return nobs x nobs CS matrix; 2: return a list for first derivatives of the compound symmetry matrix wrt sigma and rho;
+##               3: return an array containing 2nd derivatives of the compound symmetry matrix wrt sigma and rho.
+## @aliases fun.csmat
+## @export
 fun.csmat<-function(sigma,rho,obsi,transform,case=1) {
   ## calculate the the related quantity for compound symmetry vcov matrix.
   ## input
@@ -449,18 +560,17 @@ fun.csmat<-function(sigma,rho,obsi,transform,case=1) {
 }
 
 
-#' Internal Function for generate AR1 matrix and its first and second derivatives wrt D
-#'
-#' Calculate the autoregressive matrix and its first and second derivatives wrt D.
-#' @param sigma standard deviation
-#' @param rho autoregressive  parameter
-#' @param obsi dimision of the square matrix
-#' @param transform logical indicating wether or not the parameter in D is transformed.
-#' @param case   1: return nobs x nobs AR1 matrix; 2: return a list for first derivatives of the compound symmetry matrix wrt sigma and rho;
-#'               3: eturn an array containing 2nd derivatives of the compound symmetry matrix wrt sigma and rho.
-#' @aliases fun.ar1mat
-#' @export
-
+## Internal Function for generate AR1 matrix and its first and second derivatives wrt D
+##
+## Calculate the autoregressive matrix and its first and second derivatives wrt D.
+## @param sigma standard deviation
+## @param rho autoregressive  parameter
+## @param obsi dimision of the square matrix
+## @param transform logical indicating wether or not the parameter in D is transformed.
+## @param case   1: return nobs x nobs AR1 matrix; 2: return a list for first derivatives of the compound symmetry matrix wrt sigma and rho;
+##               3: return an array containing 2nd derivatives of the compound symmetry matrix wrt sigma and rho.
+## @aliases fun.ar1mat
+## @export
 fun.ar1mat<-function(sigma,rho,obsi,transform,case=1) {
   ## calculate the the related quantity for AR1 (autoregressive process of order 1) vcov matrix.
   ## input
@@ -512,7 +622,7 @@ fun.ar1mat<-function(sigma,rho,obsi,transform,case=1) {
                 res12 <- matrix(0, nrow=nobs, ncol=nobs)
                 for (i in 1:nobs){
                 for (j in 1:nobs){
-                res12[i,j]<-abs(i-j)*rho^(abs(i-j)-1)
+                res12[i,j]<-2*sigma*abs(i-j)*rho^(abs(i-j)-1)
                 }}
                 res[1,2,,]=res[2,1,,]=res12
 
@@ -520,7 +630,7 @@ fun.ar1mat<-function(sigma,rho,obsi,transform,case=1) {
                 for (i in 1:nobs){
                 for (j in 1:nobs){
                 if(abs(i-j)<=1) res22[i,j] <- 0 else
-                                res22[i,j]<-abs(i-j)*(abs(i-j)-1)*rho^(abs(i-j)-2)
+                                res22[i,j]<-sigma^2*abs(i-j)*(abs(i-j)-1)*rho^(abs(i-j)-2)
                 }}
                 res[2,2,,]=res22
                }
@@ -579,20 +689,17 @@ fun.ar1mat<-function(sigma,rho,obsi,transform,case=1) {
  res
 }
 
-
-#' Internal Function for generate a general symmetric matrix and its first and second derivatives wrt D
-#'
-#' Calculate the general symmetric matrix and its first and second derivatives wrt D.
-#' @param sigma standard deviation
-#' @param rho correlation coefficient
-#' @param obsi dimension of the square matrix
-#' @param transform logical indicating wether or not the parameter in D is transformed.
-#' @param case   1: return nobs x nobs general symmetric  matrix; 2: return a list for first derivatives of the general symmetric matrix wrt D;
-#'               3: return an array containing 2nd derivatives of the general symmetric matrix wrt D.
-#' @param case2 indicator for variance and covariance parameters. 
-#' @aliases fun.generalmat
-#' @export
-
+## Internal Function for generate a general symmetric matrix and its first and second derivatives wrt D
+## Calculate the general symmetric matrix and its first and second derivatives wrt D.
+## @param sigma standard deviation
+## @param rho correlation coefficient
+## @param obsi dimension of the square matrix
+## @param transform logical indicating wether or not the parameter in D is transformed.
+## @param case   1: return nobs x nobs general symmetric  matrix; 2: return a list for first derivatives of the general symmetric matrix wrt D;
+##               3: return an array containing 2nd derivatives of the general symmetric matrix wrt D.
+## @param case2 indicator for variance and covariance parameters. 
+## @aliases fun.generalmat
+## @export
 fun.generalmat<-function(sigma,rho,obsi,transform,case=1, case2=NULL) {
   ## calculate the the related quantity for compound symmetry vcov matrix.
   ## input
@@ -867,121 +974,221 @@ res
 }
 
 
-#' Internal Function to fit the missing data model and obtain the predicted probabilities of being observed for all observations.
+#' Utility function to generate missing status variables in longitudinal data with dropout and/or intermittent missingness.
+#'
+#' @param data the name of the panel dataset in the long format with each row denoting a subject-visit observation
+#'       for ALL the planned visits, regardless of being missed or not. When a subject is lost to follow up, the data set
+#'        must include the observation at the first time of being lost to follow up. 
+#' @param id   the name of the level-2 clustering variable. 
+#' @param time  the name of the variable denoting the time of the visit. Can set time=NULL if data is already sorted by id and time within 
+#'                id. 
+#' @param y the name of the outcome variable of the interest that is subject to missingness. 
+#' @return a dataset with the following three new variables added: 
+#' \itemize{
+#'    \item    g_ : missingness indicator, "O"-observed, "I"-intermittent missing, "D"-dropout
+#'    \item    gp_: missingness indicator in the previous visit, "O"-observed, "I"-intermittent missing, "D"-dropout, "U"-undefined. 
+#'    \item    yp_: the immediately observed prior outcome.
+#'  }
+#' @export definemissingstatus
+#' @name definemissingstatus
+#' @examples
+#' qolefnew <- definemissingstatus(qolef, id=id, time=time, y=y)
+definemissingstatus<-function(data, id, time, y) {
+  
+
+  if (missing(data)) stop("Need to specify the name of the dataset for defining missingness status")
+  if (missing(id)) stop("Need to specify the name of the level-2 clustering variable for  defining missingness status")
+  if (missing(y)) stop("Need to specify the name of the outcome variable for  defining missingness status")
+
+  id=as.character(substitute(id))
+  if (!missing(time)) time=as.character(substitute(time))
+  y=as.character(substitute(y))
+
+  ## first sort the data by id and time
+  if (!missing(time)) data = data[order(data[,id], data[,time]),]
+  uid = unique(data[,id])
+  lastobsT=numeric(length(uid))  
+  g=gp=res=NULL
+
+  for (i in 1:length(uid)) {
+   datai <- data[data[,id]==uid[i],,drop=F]  
+   ypi <-gi<-gpi<-numeric(dim(datai)[1])
+   maxT=nrow(datai)
+   if (any(!is.na(datai[,y]))) lastobsT[i] <- max((1:nrow(datai))[!is.na(datai[,y])]) else
+    lastobsT[i] <- 0 
+
+  for (j in 1:nrow(datai)) {
+
+    ## assign values to yp, g, gp 
+     if (j==1) {
+        ypi[1]=NA;
+        if (!is.na(datai[j,y])) gi[j]= "O" else
+        if (lastobsT[i]<1) gi[j]="D" else 
+        gi[j]="I"  
+        gpi[j]="U"
+       if (j < maxT) ypi[j+1] <- datai[j,y]
+                               } else
+                               {
+        if (j < maxT) ypi[j+1] = ifelse(is.na(datai[j,y]), ypi[j],  datai[j, y])
+         gpi[j] = gi[j-1]
+         if (j < lastobsT[i]) gi[j] = ifelse( is.na(datai[j,y]), "I", "O") else
+         if (j == lastobsT[i])  gi[j] = ifelse( is.na(datai[j,y]), "D","O") else
+         if (j > lastobsT[i])   gi[j] ="D"  
+                                } 
+                             } ## end of  for loop for index j
+  
+  res = rbind(res, data.frame(datai, yp_=ypi,g_=gi,gp_=gpi))  
+  }  ## end of the outer for loop for index i. 
+  res
+}
+
+
+#' Function to fit the transitional missing data model and obtain the predicted probabilities of being observed for all observations.
 #'
 #' Fit missing data model and obtain predicted probabilities of being observed for all observations.
+#' @param formula a formula to specify a multinomial transitional missing data model  in the form of g+gp ~Sterms. 
 #' @param data the name of the dataset for fitting missing data mechansim model
-#' @param gmodel a formula to specify a multinomial transitional missing data model.
-#' @aliases fun.gfit
-#' @export
-fun.gfit<- function(data, gmodel) {
-  ## This is the function to fit the multinomial logit model for the missingness
+#' @param subset an optional vector specifying a subset of observations to be used in the fitting process for the outcome model and the missingness mechanism model.
+#' @param weights an optional vector of "prior weights" to be used in the fitting process for the missingness mechanism model.
+#'               Should be NULL or a numeric vector.
+#' @aliases tmdm
+#' @export tmdm
+#' @examples
+#' qolefitg <- tmdm(g+gp~as.factor(time)+group+perf+sever,data=qolef)
+tmdm<- function(formula, data, weights, subset) {
+   
+   ## (1) process the call and set up model frame.
+   cl <- match.call()
+   if (missing(data))  data <- environment(formula)
+  
+   mf <- match.call(expand.dots = FALSE)    
+   m <- match(c("formula", "data",  "subset", "weights"), names(mf), 0L)
+   mf <- mf[c(1L, m)]
+   f <- Formula(formula)
+   if (any(length(f) !=1 )) stop ("Model specification for the missing data model is wrong. Please check if  missing data model is specified as g +gp ~Sterms.")
+   mf$formula <- f
+   mf[[1L]] <- as.name("model.frame") 
+   options(na.action=na.pass)
+   mf <- eval(mf, parent.frame())
+   
+   ## This is the function to fit the multinomial logit transitional model for the missingness
+   if (missing(weights)) WTs <- NULL else 
+         WTs <- model.extract(mf, "weights")
+   if (!is.null(WTs) && !is.numeric(WTs)) 
+        stop("'weights' must be a numeric vector")
+   if (!is.null(WTs) && any(WTs < 0)) 
+        stop("negative weights not allowed")
+   if (is.null(WTs))
+        WTs <- rep(1, nrow(mf))
+  
+   WTs_ <- NULL
+   mf$WTs_= WTs
+   mf$obsprob_= NA ## initialize the hhat column.
+   mf$A10_= NA
+   mf$A20_= NA
+   mf$A11_= NA
 
 
-  ##data=data[,!names(data)=="fitprobs"]
-  data$obsprob= NA ## initialize the hhat column.
-  data$A10= NA
-  data$A20= NA
-  data$A11= NA
-  if (any(!(data$g %in% c("O","I","D")))) stop("Data error: missing status variable must take D, I or O")
-  if (any(!(data$gp %in% c("O","I","D","U")))) stop("Data error: missing status variable
+   ##(2) Extract responses and predictors from the model frame
+   if (ncol(model.part(f,data=mf, lhs=1)) != 2) stop("Need to specify both g_ and gp_ as the responses for  the transitional missing data model") 
+   mf$g_<- model.part(f,data=mf, lhs=1)[,1]
+   mf$gp_<- model.part(f,data=mf, lhs=1)[,2]
+   gmodel=formula(f, lhs=1, rhs=1)
+   gmodel <- as.formula(paste("g_ ~ ", gmodel[3], sep=" " ))
+
+   s<- as.data.frame(model.matrix(gmodel, data=mf))
+   if (nrow(s)<1) print("No predictor variables specified for the outcome")
+   options(na.action=na.omit)
+
+
+   if (any(!(mf$g_ %in% c("O","I","D")))) stop("Data error: missing status variable must take D, I or O")
+   if (any(!(mf$gp_ %in% c("O","I","D","U")))) stop("Data error: missing status variable
                 for the prior visit must take D, I, O or U")
 
+   ## set reference level of the response for logistic regression.
+   mf$g_=relevel(mf$g_, "O")
 
-  ## set reference level of the response for logistic regression.
-  data$g=as.factor(data$g)
-  data$g=relevel(data$g, "O")
+   ## (1) gp="D: set hhat=0 for all observations after dropout time
+   mf$obsprob_[mf$gp_=="D"]=0; mf$A10_[mf$gp_=="D"]=0; mf$A20_[mf$gp_=="D"]=0; mf$A11_[data$gp=="D"]=0
 
-  ## (1) gp="D: set hhat=0 for all observations after dropout time
-  data$obsprob[data$gp=="D"]=0; data$A10[data$gp=="D"]=0; data$A20[data$gp=="D"]=0; data$A11[data$gp=="D"]=0
-
-  ## (2) gp="O": fit multinomial logistic regression to obtain hhat
-    data.v0 = data[data$gp=="O",]
-    if (! any(data.v0$g=="O")) {            ## If the set of g values is "I", "D" or "I, D"  in this subsample.This is essentially dropouts.
-      data$obsprob[data$gp=="O"]=0;data$A10[data$gp=="O"]=0; data$A20[data$gp=="O"]=0; data$A11[data$gp=="O"]=0;      
-    }   else if (all(data.v0$g=="O")) { ## If all data are observed in this subsample
-     data$obsprob[data$gp=="O"]=1;data$A10[data$gp=="O"]=1; data$A20[data$gp=="O"]=0; data$A11[data$gp=="O"]=0;
-      } else if (any(data.v0$g!="O")) {
-        if (length(unique(data.v0$g))>2) {     ## g includes "O, I, D" in this subsample.
-          mdm.v0 =multinom(gmodel, data=data.v0, Hess=TRUE,maxit=500)
+   ## (2) gp="O": fit multinomial logistic regression to obtain hhat
+   mf.v0 = mf[mf$gp_=="O",,drop=F]
+   s.v0= s[mf$gp_=="O",,drop=F]
+   if (! any(mf.v0$g_=="O")) {            ## If the set of g values is all on "I", "D" or "I, D"  in this subsample.This is essentially dropouts.
+      mf$obsprob_[mf$gp_=="O"]=0; mf$A10_[mf$gp_=="O"]=0; mf$A20_[mf$gp_=="O"]=0; mf$A11_[mf$gp_=="O"]=0;      
+    }   else if (all(mf.v0$g_=="O")) { ## If all data are observed in this subsample
+     mf$obsprob_[mf$gp_=="O"]=1; mf$A10_[mf$gp_=="O"]=1; mf$A20_[mf$gp_=="O"]=0; mf$A11_[mf$gp_=="O"]=0;
+      } else if (any(mf.v0$g_!="O")) {
+        missS  <- apply(s.v0, 2, FUN=function (u) any(is.na(u)))
+        s.v0$WTs_=mf.v0$WTs_
+        s.v0$g_=mf.v0$g_
+        if (length(unique(mf.v0$g_))>2) {     ## g includes "O, I, D" in this subsample.  
+          mdm.v0 =multinom(g_ ~ .-1- WTs_, data=s.v0[,!missS], weights=WTs_, Hess=TRUE,maxit=500)
           mdm.v0.fit=as.data.frame(mdm.v0$fit)
-          data$obsprob[data$gp=="O"]=mdm.v0.fit$O; data$A10[data$gp=="O"]=as.numeric(data.v0$g=="I")-mdm.v0.fit$I; 
-          data$A20[data$gp=="O"]=as.numeric(data.v0$g=="D")-mdm.v0.fit$D; data$A11[data$gp=="O"]=0; 
-              }  else if (length(unique(data.v0$g))==2)  {  ## g includes "O, I", or "O,D" in this subsample.
-                  mdm.v0 =glm(gmodel, family=binomial(link=logit), data=data.v0)
-                  data$obsprob[data$gp=="O"]=1-mdm.v0$fit; 
-                  data$A10[data$gp=="O"]=as.numeric(data.v0$g=="I")*(1-mdm.v0$fit);
-                  data$A20[data$gp=="O"]=as.numeric(data.v0$g=="D")*(1-mdm.v0$fit);  
-                  data$A11[data$gp=="O"]=0;
+          mf$obsprob_[mf$gp_=="O"]=mdm.v0.fit$O; mf$A10_[mf$gp_=="O"]=as.numeric(mf.v0$g_=="I")-mdm.v0.fit$I; 
+          mf$A20_[mf$gp_=="O"]=as.numeric(mf.v0$g_=="D")-mdm.v0.fit$D; mf$A11_[mf$gp_=="O"]=0; 
+              }  else if (length(unique(mf.v0$g_))==2)  {  ## g includes "O, I", or "O,D" in this subsample.
+                  mdm.v0 =multinom(g_ ~ .-1- WTs_, data=droplevels(s.v0[,!missS]), weights=WTs_, Hess=TRUE,maxit=500)
+                  ## mdm.v0 =glm(g_ ~ .-1- WTs_, data=s.v0[,!missS], weights=WTs_, family=binomial(link=logit))
+                  ##print(coef(mdm.v0))
+                  mf$obsprob_[mf$gp_=="O"]=1-mdm.v0$fit; 
+                  mf$A10_[mf$gp_=="O"]=as.numeric(mf.v0$g_=="I")*(1-mdm.v0$fit);
+                  mf$A20_[mf$gp_=="O"]=as.numeric(mf.v0$g_=="D")*(1-mdm.v0$fit);  
+                  mf$A11_[mf$gp_=="O"]=0;
                                                    }
-      } else  print("Warning: check the values of g for the subsample gp=0")
+     } else  print("Warning: check the values of g_ for the subsample gp=0")
+    
 
-  ## (3) gp="I": 
-    data.v1 = data[data$gp=="I",]
-    if (any(data.v1$g=="D")) { ## if the set of g values is "D", "O, D", "I, D", "O,I,D"
-        stop("Data error: There should no dropout immediately after intermittent missingness. Please check your data for such cases. ")
-    } else if (! any(data.v1$g=="O")) {## if the set of g values is "I" only. This is essentially dropouts.
-      data$obsprob[data$gp=="I"]=0; data$A10[data$gp=="I"]=0; data$A20[data$gp=="I"]=0; data$A11[data$gp=="I"]=0;  
-    } else if (all(data.v0$g=="O")) { ## If all data are observed in this subsample
-         data$obsprob[data$gp=="I"]=1; data$A10[data$gp=="I"]=1; data$A20[data$gp=="I"]=0; data$A11[data$gp=="I"]=0;
-    } else  if (any(data.v1$g!="O")) { ## the set of g values is " O, I"
-      mdm.v1 =glm(gmodel, family=binomial(link=logit), data=data.v1)
-      data$obsprob[data$gp=="I"]=data$A11[data$gp=="I"]=1-mdm.v1$fit; 
-      data$A10[data$gp=="I"]=data$A20[data$gp=="I"]=0
-   ##   if (length(unique(data.v1$g))>2) data$obsprob[data$gp=="I"]=mdm.v1$fit[,1] else
-   ##     if (length(unique(data.v1$g))==2)  data$obsprob[data$gp=="I"]=1-mdm.v1$fit[,1]
+   ## (3) gp="I": 
+   ## The missingness status at prior visit gp_ is essentially a dropout.  
+   mf$gp_[mf$gp_=="I" & mf$g_=="D"]="D" 
+   mf.v1 = mf[mf$gp_=="I",,drop=F]
+   s.v1= s[mf$gp_=="I",,drop=F]
+   missS  <- apply(s.v1, 2, FUN=function (u) any(is.na(u)))
+   s.v1$WTs_=mf.v1$WTs_
+   s.v1$g_=mf.v1$g_
+      
+   if (any(mf.v1$g_=="D")) { ## if the set of g values is "D", "O, D", "I, D", "O,I,D"
+        stop("Data error: There should no dropout immediately after intermittent missingness. Change intermittent missingness to dropout ")
+   } else if (! any(mf.v1$g_=="O")) {## if the set of g values is "I" only. This means all are dropouts.
+      mf$obsprob_[mf$gp_=="I"]=0; mf$A10_[mf$gp_=="I"]=0; mf$A20_[mf$gp_=="I"]=0; mf$A11_[mf$gp_=="I"]=0;  
+   } else if (all(mf.v1$g_=="O")) { ## If all data are observed in this subsample
+         mf$obsprob_[mf$gp_=="I"]=1; mf$A10_[mf$gp_=="I"]=1; mf$A20_[mf$gp_=="I"]=0; mf$A11_[mf$gp_=="I"]=0;
+   } else  if (any(mf.v1$g_!="O")) { ## the set of g values is " O, I"
+       mdm.v1 =multinom(g_ ~ .-1- WTs_, data=droplevels(s.v1[,!missS]),  weights=WTs_, Hess=TRUE,maxit=500)
+       ##  mdm.v1 =glm(g_ ~ .-1- WTs_, data=s.v1[,!missS], family=binomial(link=logit), weights=WTs_)
+      mf$obsprob_[mf$gp_=="I"]=mf$A11_[mf$gp_=="I"]=1-mdm.v1$fit; 
+      mf$A10_[mf$gp_=="I"]=mf$A20_[mf$gp_=="I"]=0
     } 
 
    ## (4) gp="U": baseline observations
-    data$obsprob[data$gp=="U"]=1; data$A10[data$gp=="U"]=0; data$A20[data$gp=="U"]=0; data$A11[data$gp=="U"]=0
+    mf$A10_[mf$gp_=="U"]=0; mf$A20_[mf$gp_=="U"]=0; mf$A11_[mf$gp_=="U"]=0; mf$obsprob_[mf$gp_=="U"]=mf$A10_[mf$gp_=="U"]+ mf$A20_[mf$gp_=="U"]+ mf$A11_[mf$gp_=="U"];
 
-    return(data)
+    return(mf)
 
 }
 
+fun.trans2pos <- function(u)  {
 
-
-## code for some utility function
-
-#'  function for isnigls section expit: expit transformation
-#' @param u need more information
-#' @export
-#' @name expit
-#' @aliases expit
-
-expit<-function(u) {
-  ## Inverse logit function.
-  uu<-pmin(u,709)
-  exp(uu)/(1+exp(uu))
+  res<-exp(u)
+  res
 }
-##
 
-#' function for isnigls section  expit2: expit transformation extended
-#' @param u need more information
-#' @param p need more information
-#' @export
-#' @name expit2
-#' @aliases expit2
 
-expit2<-function(u,p){
-  ## Extended Inverse logit function.
-  uu<-pmin(u,709)
-  lb<--1/(p-1)
-  (exp(uu)+lb)/(1+exp(uu))
+fun.trans2rho <- function(u)  {
+
+  tol=10^308
+  if (u==Inf)   u= tol
+  if (u== -Inf) u= -tol
+  rho<- 2*exp(u)/(1+exp(u))-1
+  rho
 }
-##
 
 
 fun.postrans <- function(u)  {
 
   if (u) stop("Argument has to be positive")
   res <- log(u)
-  res
-}
-
-fun.trans2pos <- function(u)  {
-
-  res<-exp(u)
   res
 }
 
@@ -995,15 +1202,6 @@ fun.rhotrans <- function(rho)  {
   if (u==1) u= 1- tol
   res<- log(u/(1-u))
   res
-}
-
-fun.trans2rho <- function(u)  {
-
-  tol=10^308
-  if (u==Inf)   u= tol
-  if (u== -Inf) u= -tol
-  rho<- 2*exp(u)/(1+exp(u))-1
-  rho
 }
 
 
