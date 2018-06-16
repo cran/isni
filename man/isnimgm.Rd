@@ -50,7 +50,7 @@ The ISNI analysis is based on a joint selection model and requires specifying tw
        current and prior visits, respectively.
 }
 \examples{
-models= y | g+gp ~   as.factor(time) * group + perf + sever |
+models= y | g+gp ~   perf + sever+ as.factor(time) + group +as.factor(time):group   |
        as.factor(time) * group + yp+ perf + sever
 qolef.isni=isnimgm(models, data=qolef, id=id)
 summary(qolef.isni)

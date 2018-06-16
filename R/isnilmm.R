@@ -203,13 +203,15 @@ isnilmm = function(formula, data, random, id, weights, subset, predprobobs, misn
     names(bD)=c(names(b),namesv,namesr,"sigmae")
   }
   sdy <- sd(y,na.rm=T)
+  isnivec=isni
   if (misni==FALSE) {
        isni=apply(isni,1, sum); senstran<-abs((sdy*se)/isni)
    } else
    {
        isni=apply(abs(isni),1, sum); senstran<-abs((sdy*se)/isni)
    }
-  res=list(coef=bD,se=se,isni=c(isni),c=c(senstran), call=cl)
+  res=list(coef=bD,se=se,isni=c(isni),c=c(senstran), call=cl, isnivec=isnivec, misni=misni, 
+        logLik=summary(iglmm)$logLik, aic=summary(iglmm)$AIC, bic=summary(iglmm)$BIC)
   class(res) = c(res$class, "isnilmm")
   res
 }
@@ -232,7 +234,8 @@ summary.isnilmm<-function(object, digits = max(3, getOption("digits") - 2),...) 
         collapse = "\n"), "\n\n", sep = "")
 
   ## Name the columns
-  isniname<-c('MAR Est.','Std. Err','ISNI','c')
+  if (object$misni==T) isniname<-c('MAR Est.','Std. Err','MISNI','c') else 
+       isniname<-c('MAR Est.','Std. Err','ISNI','c')
   
   ## Set up matrix to hold result
   res<-matrix(0,length(object$coef),length(isniname))
@@ -272,6 +275,12 @@ summary.isnilmm<-function(object, digits = max(3, getOption("digits") - 2),...) 
             quote = FALSE)
      }
       else cat("No coefficients\n")
+      cat("\nlogLik of the MAR model: ", paste(format(x$logLik,digits=digits), sep = "\n", 
+        collapse = "\n"), "\n", sep = "")
+     cat("\nAIC of the MAR model: ", paste(format(x$aic, digits=digits), sep = "\n", 
+        collapse = "\n"), "\n", sep = "")
+     cat("\nBIC of the MAR model: ", paste(format(x$bic, digits=digits), sep = "\n", 
+        collapse = "\n"), "\n", sep = "")
       cat("\n")
       invisible(x)
     

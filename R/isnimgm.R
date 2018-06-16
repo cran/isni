@@ -87,7 +87,7 @@ NULL
 #' @importFrom nlme corCompSymm
 #' @export isnimgm
 #' @examples
-#' models= y | g+gp ~   as.factor(time) * group + perf + sever |
+#' models= y | g+gp ~   perf + sever+ as.factor(time) + group +as.factor(time):group   |
 #'        as.factor(time) * group + yp+ perf + sever
 ## gmodel= as.factor(g)~ t3+t6+group+yp+perf+sever
 ## qolef$t12<-qolef$t1*qolef$group
@@ -183,9 +183,9 @@ isnimgm = function(formula, data, cortype="CS", id, subset, weights, predprobobs
  
 
   ## fit the mgm with the observed data.
-  if (cortype=="CS")  iggls= gls(ymodel, data=mf,correlation = corCompSymm(form =  ~ 1 | isni_id), weights=~1/isni_WTs, na.action=na.exclude) else
-  if (cortype=="AR1") iggls= gls(ymodel, data=mf,correlation = corAR1(form =  ~ 1 | isni_id), weights=~1/isni_WTs, na.action=na.exclude) else
-  if (cortype=="UN")  iggls= gls(ymodel, data=mf,correlation = corSymm(form =  ~ 1 | isni_id), weights=~1/isni_WTs, na.action=na.exclude) else
+  if (cortype=="CS")  iggls= gls(ymodel, data=mf,correlation = corCompSymm(form =  ~ 1 | isni_id), weights=~1/isni_WTs, method="ML", na.action=na.exclude) else
+  if (cortype=="AR1") iggls= gls(ymodel, data=mf,correlation = corAR1(form =  ~ 1 | isni_id), weights=~1/isni_WTs, method="ML",na.action=na.exclude) else
+  if (cortype=="UN")  iggls= gls(ymodel, data=mf,correlation = corSymm(form =  ~ 1 | isni_id), weights=~1/isni_WTs, method="ML",na.action=na.exclude) else
   stop ("This Type of correlation is not implmented yet for ISNI computation")
 
 
@@ -227,14 +227,17 @@ isnimgm = function(formula, data, cortype="CS", id, subset, weights, predprobobs
   if (cortype=="UN" )                {
   names(bD)=c(names(b), 'sigma', names(D[[2]]))
                              }
+  isnivec=isni
+  dimnames(isnivec)<-list(names(bD),c("ISNI_IO", "ISNI_DO", "ISNI_II"))
   if (misni==FALSE) {
        isni=apply(isni,1, sum); senstran<-abs((sdy*se)/isni)
    } else
    {
        isni=apply(abs(isni),1, sum); senstran<-abs((sdy*se)/isni)
    }
-
-  res=list(coefficients=bD,se=se,isni=c(isni),c=c(senstran), call=cl)
+  
+  res=list(coefficients=bD,se=se,isni=c(isni),c=c(senstran), call=cl, isnivec=isnivec, misni=misni, 
+                       logLik=iggls$logLik, aic=summary(iggls)$AIC, bic=summary(iggls)$BIC)
   class(res) = c(res$class, "isnimgm")
   return(res)
 }
@@ -258,7 +261,8 @@ summary.isnimgm<-function(object, digits = max(3, getOption("digits") - 2),
   cat("\nCall:\n", paste(deparse(object$call), sep = "\n", 
         collapse = "\n"), "\n\n", sep = "")
   ## Name the columns
-  isniname<-c('MAR Est.','Std. Err','ISNI','c')
+    if (object$misni==T) isniname<-c('MAR Est.','Std. Err','MISNI','c') else 
+       isniname<-c('MAR Est.','Std. Err','ISNI','c')
 
   ## Set up matrix to hold result
   res<-matrix(0,length(object$coef),length(isniname))
@@ -299,6 +303,12 @@ summary.isnimgm<-function(object, digits = max(3, getOption("digits") - 2),
             quote = FALSE)
      }
      else cat("No coefficients\n")
+     cat("\nlogLik of the MAR model: ", paste(format(x$logLik,digits=digits), sep = "\n", 
+        collapse = "\n"), "\n", sep = "")
+     cat("\nAIC of the MAR model: ", paste(format(x$aic, digits=digits), sep = "\n", 
+        collapse = "\n"), "\n", sep = "")
+     cat("\nBIC of the MAR model: ", paste(format(x$bic, digits=digits), sep = "\n", 
+        collapse = "\n"), "\n", sep = "")
      cat("\n")
      invisible(x)
     

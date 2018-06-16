@@ -277,7 +277,7 @@
 
     if(family$family=='poisson'|family$family=='binomial') senstran<-abs(se/isni)
     else senstran<-abs((sdy*se)/isni)
-    res=list(coefficients=rego$coef,se=se,tau=tau,isni=isni[,1],c=senstran[,1], call=cl, formula=formula)
+    res=list(coefficients=rego$coef,se=se,tau=tau,isni=isni[,1],c=senstran[,1], call=cl, formula=formula, deviance=rego$deviance, aic=rego$aic)
     class(res) = c(res$class, "isniglm")
     res
     }
@@ -347,6 +347,10 @@
             quote = FALSE)
     }
     else cat("No coefficients\n")
+    cat("\nResidual Deviance of the MAR model: ", paste(format(x$deviance, digits=digits), sep = "\n", 
+        collapse = "\n"), "\n", sep = "")
+     cat("\nAIC of the MAR model: ", paste(format(x$aic, digits=digits), sep = "\n", 
+        collapse = "\n"), "\n", sep = "")
     cat("\n")
     invisible(x)
     
