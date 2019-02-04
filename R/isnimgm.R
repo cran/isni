@@ -1,3 +1,9 @@
+## Updates
+## Nov 16, 2018
+## Add codes to permit ISNI calculation when there are subjects with all outcomes are missing. 
+##  The added codes are in isnimgm(), fun.mgmsubi(), 
+
+
 #' A data set for Psychiatric Drug Treatment
 #'
 #' The variables are as follows:
@@ -211,6 +217,8 @@ isnimgm = function(formula, data, cortype="CS", id, subset, weights, predprobobs
   for (i in 1:length(uid)) {
     xi= as.matrix(x[mf$isni_id==uid[i],,drop=F])
     yi= y[mf$isni_id==uid[i]]
+    ## Increase nabla11 only if there is at least one observed outcome
+    if (!all(is.na(yi)))
     nabla11=nabla11+ fun.mgmsubi(yi=yi,xi=xi,maxT=maxT, b=b,D=D, cortype=cortype, transform=FALSE, case=1)
     gfiti= NULL; Afiti=NULL
     if (! missing(predprobobs))  gfiti= mf$fitprobs_[mf$isni_id==uid[i]]
@@ -373,12 +381,15 @@ fun.mgmsubi <- function ( yi, xi, maxT=maxT, b, D, cortype,transform=FALSE, gfit
   }
 
     covyiobs= covyi[obsi,obsi]
-    icovyiobs= solve(covyiobs)
+    ## only invert if there is yiobs is not empty
+    if (niobs>0) icovyiobs= solve(covyiobs)
 
  
   ## case=1, compute the nabla11 for subject i
   if (case==1) {
     nabla11= matrix(0, npar, npar)
+    ## return 0 if there is no observed outcome.
+    if (niobs==0) return(nabla11)
     nabla11[1:nb, 1:nb]=-t(xiobs)%*%icovyiobs%*%xiobs
   if (cortype=="CS") {
     covid1 = fun.csmat(sigma=sigma,rho=rho,obsi=niobs,transform=transform,case=2)
@@ -452,10 +463,11 @@ fun.mgmsubi <- function ( yi, xi, maxT=maxT, b, D, cortype,transform=FALSE, gfit
         
 
         cit = covyi[misi, obsi,drop=F]
-
+        dmean.D= matrix(0, nrow=nD, ncol=ncol(Afit0i))
+        if (niobs==0) {dmean.beta=t(ximis)%*% Afit0i; return(rbind(dmean.beta, dmean.D)) }
+        
         dmean.beta = t(ximis - cit %*% icovyiobs %*% xiobs) %*% Afit0i ## as.matrix(fitp0i)
-     
-        dmean.D= matrix(0, nrow=nD, ncol=ncol(Afit0i)) ##numeric(nD)
+        ##numeric(nD)
 
         if (cortype=="CS") {
         derD= fun.csmat(sigma=sigma,rho=rho,obsi=length(yi),transform=transform,case=2)
@@ -1146,7 +1158,7 @@ tmdm<- function(formula, data, weights, subset) {
                   mf$A20_[mf$gp_=="O"]=as.numeric(mf.v0$g_=="D")*(1-mdm.v0$fit);  
                   mf$A11_[mf$gp_=="O"]=0;
                                                    }
-     } else  print("Warning: check the values of g_ for the subsample gp=0")
+     } else  print("Warning: check the values of g_ for the subsample gp=O")
     
 
    ## (3) gp="I": 
@@ -1172,7 +1184,33 @@ tmdm<- function(formula, data, weights, subset) {
     } 
 
    ## (4) gp="U": baseline observations
-    mf$A10_[mf$gp_=="U"]=0; mf$A20_[mf$gp_=="U"]=0; mf$A11_[mf$gp_=="U"]=0; mf$obsprob_[mf$gp_=="U"]=mf$A10_[mf$gp_=="U"]+ mf$A20_[mf$gp_=="U"]+ mf$A11_[mf$gp_=="U"];
+    ##mf$A10_[mf$gp_=="U"]=0; mf$A20_[mf$gp_=="U"]=0; mf$A11_[mf$gp_=="U"]=0
+    ##mf$obsprob_[mf$gp_=="U"]=mf$A10_[mf$gp_=="U"]+ mf$A20_[mf$gp_=="U"]+ mf$A11_[mf$gp_=="U"];
+    mf.vU = mf[mf$gp_=="U",,drop=F]
+   s.vU= s[mf$gp_=="U",,drop=F]
+   if (! any(mf.vU$g_=="O")) {            ## If the set of g values is all on "I", "D" or "I, D"  in this subsample.Then the probability of being observed is zero.
+      mf$obsprob_[mf$gp_=="U"]=0; mf$A10_[mf$gp_=="U"]=0; mf$A20_[mf$gp_=="U"]=0; mf$A11_[mf$gp_=="U"]=0;      
+    }   else if (all(mf.vU$g_=="O")) { ## If all data are observed in this subsample
+     mf$obsprob_[mf$gp_=="U"]=1; mf$A10_[mf$gp_=="U"]=1; mf$A20_[mf$gp_=="U"]=0; mf$A11_[mf$gp_=="U"]=0;
+      } else if (any(mf.vU$g_!="O")) {
+        missS  <- apply(s.vU, 2, FUN=function (u) any(is.na(u)))
+        s.vU$WTs_=mf.vU$WTs_
+        s.vU$g_=mf.vU$g_
+        if (length(unique(mf.vU$g_))>2) {     ## g includes "O, I, D" in this subsample.  
+          mdm.vU =multinom(g_ ~ .-1- WTs_, data=s.vU[,!missS], weights=WTs_, Hess=TRUE,maxit=500)
+          mdm.vU.fit=as.data.frame(mdm.vU$fit)
+          mf$obsprob_[mf$gp_=="U"]=mdm.vU.fit$O; mf$A10_[mf$gp_=="U"]=as.numeric(mf.vU$g_=="I")-mdm.vU.fit$I; 
+          mf$A20_[mf$gp_=="U"]=as.numeric(mf.vU$g_=="D")-mdm.vU.fit$D; mf$A11_[mf$gp_=="U"]=0; 
+              }  else if (length(unique(mf.vU$g_))==2)  {  ## g includes "O, I", or "O,D" in this subsample.
+                  mdm.vU =multinom(g_ ~ .-1- WTs_, data=droplevels(s.vU[,!missS]), weights=WTs_, Hess=TRUE,maxit=500)
+                  ## mdm.v0 =glm(g_ ~ .-1- WTs_, data=s.v0[,!missS], weights=WTs_, family=binomial(link=logit))
+                  ##print(coef(mdm.v0))
+                  mf$obsprob_[mf$gp_=="U"]=1-mdm.vU$fit; 
+                  mf$A10_[mf$gp_=="U"]=as.numeric(mf.vU$g_=="I")*(1-mdm.vU$fit);
+                  mf$A20_[mf$gp_=="U"]=as.numeric(mf.vU$g_=="D")*(1-mdm.vU$fit);  
+                  mf$A11_[mf$gp_=="U"]=0;
+                                                   }
+     } ##else  print("Warning: check the values of g_ for the subsample gp=U")
 
     return(mf)
 

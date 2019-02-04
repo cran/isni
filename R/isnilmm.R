@@ -1,4 +1,7 @@
-
+## Updates
+## Nov 16, 2018
+## Add codes to permit ISNI calculation when there are subjects with all outcomes are missing. 
+##  The added codes are in isnilmm(), fun.mixsubi(), 
 
 #' Function for ISNI computation when the outcome follows LMM.
 #'
@@ -54,12 +57,12 @@
 #' summary(result)
 #' 
 isnilmm = function(formula, data, random, id, weights, subset, predprobobs, misni=FALSE) {
-  
+
     ## (1) process the call and set up model frame.
     cl <- match.call()
     if (missing(data))  data <- environment(formula)
     if (missing(id)) stop("Users need to supply the name of the level-2 clusting variable in the data via the argument id.")
-
+  
     mf <- match.call(expand.dots = FALSE)    
     m <- match(c("formula", "data",  "subset", "weights", "id", "predprobobs"), names(mf), 0L)
     mf <- mf[c(1L, m)]
@@ -76,7 +79,8 @@ isnilmm = function(formula, data, random, id, weights, subset, predprobobs, misn
     mf[[1L]] <- as.name("model.frame")
     mf <- eval(mf, parent.frame())
     ID= model.extract(mf, "id")
-       
+
+   
     if (missing(weights)) WTs <- NULL else 
          WTs <- model.extract(mf, "weights")
     if (!is.null(WTs) && !is.numeric(WTs)) 
@@ -179,7 +183,8 @@ isnilmm = function(formula, data, random, id, weights, subset, predprobobs, misn
     xi= as.matrix(x[mf$isni_id==uid[i],,drop=F])
     zi= as.matrix(z[mf$isni_id==uid[i],,drop=F])
     yi= y[mf$isni_id==uid[i]]
-    nabla11=nabla11+ fun.mixsubi(yi=yi,desi=xi,zi=zi,b=b,d=d,gfiti=gfiti, case=1)
+    ## Increase nabla11 only if there is at least one observed outcome
+    if (!all(is.na(yi))) nabla11=nabla11+ fun.mixsubi(yi=yi,desi=xi,zi=zi,b=b,d=d,gfiti=gfiti, case=1)
     gfiti= NULL; Afiti=NULL
     if (!missing(predprobobs))  gfiti= mf$fitprobs_[mf$id==uid[i]]
     else Afiti= cbind(mf$A10_[mf$isni_id==uid[i]], mf$A20_[mf$isni_id==uid[i]], mf$A11_[mf$isni_id==uid[i]])
@@ -437,10 +442,13 @@ fun.mixsubi <- function ( yi, desi, zi, b, d, gfiti=NULL, Afiti=NULL, case=1) {
   
   covi=fun.dev(zi,ni,d,m,n, case=0)
   coviobs= covi[obsi,obsi]
-  icoviobs= solve(coviobs)
+  ## only invert if yiobs is not empty
+  if (niobs>0) icoviobs= solve(coviobs)
 
   if (case==1) {
     nabla11= matrix(0, npar, npar)
+    ## return 0 if there is no observed outcome.
+    if (niobs==0) return(nabla11)
     nabla11[1:nb, 1:nb]=-t(desiobs)%*%icoviobs%*%desiobs
    ### 
    if (nv==1){
@@ -520,6 +528,7 @@ fun.mixsubi <- function ( yi, desi, zi, b, d, gfiti=NULL, Afiti=NULL, case=1) {
   
   ## case=2, calculate the \nabla_12 for subject i.
   if (case==2) {
+   
     if (any(is.na(yi))){
       
       nabla12= matrix(0, npar,3)
@@ -529,12 +538,14 @@ fun.mixsubi <- function ( yi, desi, zi, b, d, gfiti=NULL, Afiti=NULL, case=1) {
      # muximis=as.vector(xdesi %*% as.matrix(bx))[misi]+adjmuximis
       
       desimis = as.matrix(desi[misi,,drop=F])
-     # desimis[,xmispos]=muximis
       yimis = as.vector(yi[misi])
       ##fitp0i = gfiti[misi]
        Afit0i=matrix(0, nrow=sum(misi==T), ncol=3)
        if (is.null(gfiti))  Afit0i =Afiti[misi, ,drop=F]
         else Afit0i[,1]= gfiti[misi]
+
+      ## for no observed outcome
+      if (niobs==0) {nabla12[1:nb,]=t(desimis)%*% Afit0i; return(nabla12) }
 
       nabla12[1:nb,]= (t(desimis)-t(desiobs)%*% icoviobs %*%covi[obsi,misi, drop=F])%*% Afit0i ##as.matrix(fitp0i)
       
