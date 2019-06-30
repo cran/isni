@@ -4,7 +4,7 @@ author: "Hui Xie"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteIndexEntry{ISNI}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -14,6 +14,7 @@ The `isni` package provides functions to compute, print and summarize the Index 
 - Generalized Linear Model (GLM) for independent data
 - Marginal Multivariate Gaussian Model for longitudinal/clustered data
 - linear mixed model for longitudinal/clustered data
+- mixed logit model for longitudinal/clustered binary outcome
 
 It allows for arbitrary patterns of missingness in the longitudinal regression outcomes caused by dropout and/or intermittent missingness.
 

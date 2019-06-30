@@ -2,3 +2,6 @@
 
 # isni 0.4
 1. Fix a bug that causes 'NA' in ISNI computation when a clsuter has no observed outcome values.  
+# isni 1.0
+1. Added isniglmmbin() for ISNI computation in GLMM for longitudinal/clustered binary outcomes.
+2. Fix a bug in isnimgm()

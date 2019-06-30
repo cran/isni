@@ -186,7 +186,6 @@ isnimgm = function(formula, data, cortype="CS", id, subset, weights, predprobobs
   maxT = max(table(mf$isni_id))
   sdy <- sd(y,na.rm=T)  
 
- 
 
   ## fit the mgm with the observed data.
   if (cortype=="CS")  iggls= gls(ymodel, data=mf,correlation = corCompSymm(form =  ~ 1 | isni_id), weights=~1/isni_WTs, method="ML", na.action=na.exclude) else
@@ -218,16 +217,17 @@ isnimgm = function(formula, data, cortype="CS", id, subset, weights, predprobobs
     xi= as.matrix(x[mf$isni_id==uid[i],,drop=F])
     yi= y[mf$isni_id==uid[i]]
     ## Increase nabla11 only if there is at least one observed outcome
-    if (!all(is.na(yi)))
-    nabla11=nabla11+ fun.mgmsubi(yi=yi,xi=xi,maxT=maxT, b=b,D=D, cortype=cortype, transform=FALSE, case=1)
+    if (!all(is.na(yi))) nabla11=nabla11+ fun.mgmsubi(yi=yi,xi=xi,maxT=maxT, b=b,D=D, cortype=cortype, transform=FALSE, case=1)
     gfiti= NULL; Afiti=NULL
     if (! missing(predprobobs))  gfiti= mf$fitprobs_[mf$isni_id==uid[i]]
     else Afiti= cbind(mf$A10[mf$isni_id==uid[i]], mf$A20[mf$isni_id==uid[i]], mf$A11[mf$isni_id==uid[i]])
     if (any(is.na(yi))) nabla12 = nabla12 + fun.mgmsubi(yi=yi,xi=xi,maxT=maxT, b=b,D=D, cortype=cortype, transform=FALSE, gfiti=gfiti,Afiti=Afiti, case=2)
   }
-  isni=-solve(nabla11)%*%nabla12
+  invnabla11= solve(nabla11)
+  invnabla11[1:nb,1:nb]= -iggls$varBeta
+  isni=-invnabla11%*%nabla12
 
-  se=sqrt(diag(solve(-nabla11)))
+  se=sqrt(diag((-invnabla11)))
   bD= c(b,unlist(D))
   if (cortype=="CS" | cortype=="AR1" ) {
   names(bD)=c(names(b), names(D))
@@ -383,7 +383,7 @@ fun.mgmsubi <- function ( yi, xi, maxT=maxT, b, D, cortype,transform=FALSE, gfit
     covyiobs= covyi[obsi,obsi]
     ## only invert if there is yiobs is not empty
     if (niobs>0) icovyiobs= solve(covyiobs)
-
+    ##print(icovyiobs)
  
   ## case=1, compute the nabla11 for subject i
   if (case==1) {
@@ -398,6 +398,7 @@ fun.mgmsubi <- function ( yi, xi, maxT=maxT, b, D, cortype,transform=FALSE, gfit
     Ai= covid1
     derAi= matrix(NA, nrow=niobs, ncol=niobs)
     for (j in 1:length(Ai)) Ai[[j]]= icovyiobs%*%covid1[[j]]%*%icovyiobs
+
     for (i in 1:nD) {
       for (j in 1:nD){
         derAi= -icovyiobs%*%(covid1[[i]]%*%icovyiobs%*%covid1[[j]]-covid2[i,j,,]+covid1[[j]]%*%icovyiobs%*%covid1[[i]])%*%icovyiobs
@@ -405,9 +406,9 @@ fun.mgmsubi <- function ( yi, xi, maxT=maxT, b, D, cortype,transform=FALSE, gfit
       }
     }
 
-    for (j in 1:nD) nabla11[1:nb,(nb+j)]= -0.5*t(xiobs)%*%(Ai[[j]]+t(Ai[[j]]))%*%riobs
+    for (j in 1:nD) {nabla11[1:nb,(nb+j)]= -0.5*t(xiobs)%*%(Ai[[j]]+t(Ai[[j]]))%*%riobs}
 
-    nabla11[(nb+1):npar, 1:nb]=nabla11[1:nb, (nb+1):(npar)]
+    nabla11[(nb+1):npar, 1:nb]=t(nabla11[1:nb, (nb+1):(npar)])
     }
 
   if (cortype=="AR1") {
@@ -425,7 +426,7 @@ fun.mgmsubi <- function ( yi, xi, maxT=maxT, b, D, cortype,transform=FALSE, gfit
 
     for (j in 1:nD) nabla11[1:nb,(nb+j)]= -0.5*t(xiobs)%*%(Ai[[j]]+t(Ai[[j]]))%*%riobs
 
-    nabla11[(nb+1):npar, 1:nb]=nabla11[1:nb, (nb+1):(npar)]
+    nabla11[(nb+1):npar, 1:nb] = t(nabla11[1:nb, (nb+1):(npar)])
  }
 
  if (cortype=="UN") {
@@ -443,7 +444,7 @@ fun.mgmsubi <- function ( yi, xi, maxT=maxT, b, D, cortype,transform=FALSE, gfit
 
     for (j in 1:nD) nabla11[1:nb,(nb+j)]= -0.5*t(xiobs)%*%(Ai[[j]]+t(Ai[[j]]))%*%riobs
 
-    nabla11[(nb+1):npar, 1:nb]=nabla11[1:nb, (nb+1):(npar)]
+    nabla11[(nb+1):npar, 1:nb]=t(nabla11[1:nb, (nb+1):(npar)])
   }
     return(nabla11)
   }## end if case=1
@@ -1127,6 +1128,12 @@ tmdm<- function(formula, data, weights, subset) {
    if (any(!(mf$gp_ %in% c("O","I","D","U")))) stop("Data error: missing status variable
                 for the prior visit must take D, I, O or U")
 
+   if (any(mf$gp_=="I" & mf$g_=="D")) {
+    if (!("D" %in% levels(mf$gp_))) levels(mf$gp_) <- c(levels(mf$gp_), "D")
+     mf$gp_[mf$gp_=="I" & mf$g_=="D"]= "D"
+   }
+
+
    ## set reference level of the response for logistic regression.
    mf$g_=relevel(mf$g_, "O")
 
@@ -1152,7 +1159,6 @@ tmdm<- function(formula, data, weights, subset) {
               }  else if (length(unique(mf.v0$g_))==2)  {  ## g includes "O, I", or "O,D" in this subsample.
                   mdm.v0 =multinom(g_ ~ .-1- WTs_, data=droplevels(s.v0[,!missS]), weights=WTs_, Hess=TRUE,maxit=500)
                   ## mdm.v0 =glm(g_ ~ .-1- WTs_, data=s.v0[,!missS], weights=WTs_, family=binomial(link=logit))
-                  ##print(coef(mdm.v0))
                   mf$obsprob_[mf$gp_=="O"]=1-mdm.v0$fit; 
                   mf$A10_[mf$gp_=="O"]=as.numeric(mf.v0$g_=="I")*(1-mdm.v0$fit);
                   mf$A20_[mf$gp_=="O"]=as.numeric(mf.v0$g_=="D")*(1-mdm.v0$fit);  
@@ -1162,8 +1168,9 @@ tmdm<- function(formula, data, weights, subset) {
     
 
    ## (3) gp="I": 
+   if (any(mf$gp_=="I")) {
    ## The missingness status at prior visit gp_ is essentially a dropout.  
-   mf$gp_[mf$gp_=="I" & mf$g_=="D"]="D" 
+   ##mf$gp_[mf$gp_=="I" & mf$g_=="D"]= "D"
    mf.v1 = mf[mf$gp_=="I",,drop=F]
    s.v1= s[mf$gp_=="I",,drop=F]
    missS  <- apply(s.v1, 2, FUN=function (u) any(is.na(u)))
@@ -1182,6 +1189,9 @@ tmdm<- function(formula, data, weights, subset) {
       mf$obsprob_[mf$gp_=="I"]=mf$A11_[mf$gp_=="I"]=1-mdm.v1$fit; 
       mf$A10_[mf$gp_=="I"]=mf$A20_[mf$gp_=="I"]=0
     } 
+  }
+
+
 
    ## (4) gp="U": baseline observations
     ##mf$A10_[mf$gp_=="U"]=0; mf$A20_[mf$gp_=="U"]=0; mf$A11_[mf$gp_=="U"]=0
@@ -1204,7 +1214,6 @@ tmdm<- function(formula, data, weights, subset) {
               }  else if (length(unique(mf.vU$g_))==2)  {  ## g includes "O, I", or "O,D" in this subsample.
                   mdm.vU =multinom(g_ ~ .-1- WTs_, data=droplevels(s.vU[,!missS]), weights=WTs_, Hess=TRUE,maxit=500)
                   ## mdm.v0 =glm(g_ ~ .-1- WTs_, data=s.v0[,!missS], weights=WTs_, family=binomial(link=logit))
-                  ##print(coef(mdm.v0))
                   mf$obsprob_[mf$gp_=="U"]=1-mdm.vU$fit; 
                   mf$A10_[mf$gp_=="U"]=as.numeric(mf.vU$g_=="I")*(1-mdm.vU$fit);
                   mf$A20_[mf$gp_=="U"]=as.numeric(mf.vU$g_=="D")*(1-mdm.vU$fit);  
