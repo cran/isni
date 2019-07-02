@@ -1,8 +1,8 @@
-1ce2bcfd2c721ef2c4c9e205dd2d892d *DESCRIPTION
-c7fa849b5932c48e83f02da4216007f5 *NAMESPACE
-8ca95f0ea35516f87a765706b240653c *NEWS.md
+a783388f0b6e0bbf09e7877c2caa36a0 *DESCRIPTION
+1ab27a99f7da4f68511ce9c7ca6557dc *NAMESPACE
+4c4d05ef9ddb61f26f19e7e547b69055 *NEWS.md
 a2cb5ab3f5e7e16beb4366ce23b61907 *R/isniglm.R
-79ae9118c597db34c23350bd92b3d05e *R/isniglmmbin.R
+109c7df824fbeca66ae8414b57dd2f6c *R/isniglmmbin.R
 ba5ec8677dc5cee7b71f1e8c400e7261 *R/isnilmm.R
 a59cc4d5f20618178a69e2f8b23fd070 *R/isnimgm.R
 909325ead6aebe488039f3aecf632eba *build/vignette.rds
@@ -12,11 +12,9 @@ e20da0b6f4ec94ceb94db31ce0cc0815 *data/skquit.rda
 aaca558019341617c4a33b433b6f95e7 *data/sos.rda
 7f1a0f63be72c2024aac7bcbb642d78e *inst/doc/isni_vignette.R
 9140c127b156a0933e7a87523fe1ff27 *inst/doc/isni_vignette.Rmd
-71b784083bd38a6f9fef51607137f706 *inst/doc/isni_vignette.html
+cd39d0d9ce96162bddb4ae999a88d21a *inst/doc/isni_vignette.html
 f89b482d09c5f60aa3480b23c6acf25d *man/coc.Rd
 3034edd8991d63981489a3a1902999ef *man/definemissingstatus.Rd
-43ae2349a89faea258a3e37cf54eb8c5 *man/fun.ghqd.Rd
-496f24ba7f2c7ceb5d2ac8bca395334a *man/fun.subiq.Rd
 2d72d0826df323a896e1e5c8a068bd04 *man/isniglm.Rd
 d685f3d1b652dba1e795787fb6e42b64 *man/isniglmmbin.Rd
 5bfbb0bf1ed66b9649aa00f1612688f9 *man/isnilmm.Rd

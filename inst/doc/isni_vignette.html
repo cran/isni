@@ -322,16 +322,16 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <a class="sourceLine" id="cb1-2" title="2"><span class="kw">data</span>(sos)</a>
 <a class="sourceLine" id="cb1-3" title="3">sos[<span class="kw">sample</span>(<span class="kw">nrow</span>(sos),<span class="dv">10</span>),]</a></code></pre></div>
 <pre><code>##      sexact gender faculty
-## 2702   &lt;NA&gt;   male   other
-## 3248    yes female   other
-## 4793     no female   other
-## 2608   &lt;NA&gt;   male   other
-## 257     yes   male   other
-## 2586   &lt;NA&gt;   male   other
-## 3760    yes female   other
-## 2064   &lt;NA&gt;   male   other
-## 6097   &lt;NA&gt; female     mdv
-## 5771   &lt;NA&gt; female   other</code></pre>
+## 4953   &lt;NA&gt; female   other
+## 4100    yes female   other
+## 4313    yes female   other
+## 6014     no female     mdv
+## 3660    yes female   other
+## 4421    yes female   other
+## 4748     no female   other
+## 2163   &lt;NA&gt;   male   other
+## 5129   &lt;NA&gt; female   other
+## 909     yes   male   other</code></pre>
 <p>The R code above loads the library <code>isni</code> and the data frame <code>sos</code>, displaying a random subsample of <span class="math inline">\(10\)</span> records. <code>sos</code> includes the following factor variables: <code>sexact</code> is the response to the question <code>Have you ever had sexual intercourse?</code> (two levels: no (reference level), yes); <code>gender</code> is the student’s sex (two levels: male (reference level), female); <code>faculty</code> is the student’s faculty (medical/dental/veterinary, all other faculty categories (reference level)).</p>
 <p>Assuming ignorable nonresponse, one can fit a logistic model (using responders only) to predict the outcome by sex, faculty and their interaction. We estimated the model with function :</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" title="1">ymodel=<span class="st"> </span>sexact  <span class="op">~</span><span class="st"> </span>gender<span class="op">*</span>faculty</a>

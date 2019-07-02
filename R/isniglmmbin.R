@@ -310,17 +310,17 @@ summary.isniglmm<-function(object, digits = max(3, getOption("digits") - 2),...)
     
     }
 
-#' Internal Function to calculate the various items (listed in calc) for subject i at quadrature point qpt.
-#'
-#' Calculate the compound symmetry matrix and its first and second derivatives wrt the vari-cov matrix
-#' @param qpt   design matrix for random effects
-#' @param datai list of data for subject i, must have below compnent: x: data frame representing covariates for beta.
-#'	y: vector representing the panel outcome.
-#' @param par   vector for the parameter beta and Sigma to be maximized
-#' @param calc   1: Calculate the conditional likelihood for subject i: f(Y_i|b_i);   
-#'               2: Calculate the first derivative of item 1 above w.r.t beta and sigma;
-#'               4: return the three parts  of conditional mean's derivative w.r.t beta and sigma, 
-#' @aliases  fun.subiq
+## Internal Function to calculate the various items (listed in calc) for subject i at quadrature point qpt.
+##
+## Calculate the compound symmetry matrix and its first and second derivatives wrt the vari-cov matrix
+## @param qpt   design matrix for random effects
+## @param datai list of data for subject i, must have below compnent: x: data frame representing covariates for beta.
+##	y: vector representing the panel outcome.
+## @param par   vector for the parameter beta and Sigma to be maximized
+## @param calc   1: Calculate the conditional likelihood for subject i: f(Y_i|b_i);   
+##               2: Calculate the first derivative of item 1 above w.r.t beta and sigma;
+##               4: return the three parts  of conditional mean's derivative w.r.t beta and sigma, 
+## @aliases  fun.subiq
 
     
  fun.subiq<- function (qpt,datai,par,calc=1) {
@@ -390,15 +390,15 @@ summary.isniglmm<-function(object, digits = max(3, getOption("digits") - 2),...)
       res
     }
 
-#' Internal Function to integrate the function fun w.r.t. qpt using Gaussian-Hermite Quadrature
-#'
-#' Calculate subject-level quantities when the regression outcome is subject to missingness and 
-#' follows linear mixed-effects  Models. 
-#' @param func function that contains the integration formula, the first argument must be qpt
-#' @param datai list of data for subject i, must have below compnent: x: data frame representing covariates for beta.
-#' @param ... additional arguments to the function "func"
-#' @aliases fun.ghqd
-#' @export
+## Internal Function to integrate the function fun w.r.t. qpt using Gaussian-Hermite Quadrature
+##
+## Calculate subject-level quantities when the regression outcome is subject to missingness and 
+## follows linear mixed-effects  Models. 
+## @param func function that contains the integration formula, the first argument must be qpt
+## @param datai list of data for subject i, must have below compnent: x: data frame representing covariates for beta.
+## @param ... additional arguments to the function "func"
+## @aliases fun.ghqd
+## @export
 
 fun.ghqd <- function (func,datai,...) {
   ##Gaussian-Hermite Quadrature to integrate the function fun w.r.t. qpt, 
