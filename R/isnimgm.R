@@ -86,7 +86,10 @@ NULL
 #'        To use different sets of predictors, one can explicitly specifiy a two-equation formula as: \code{response} | \code{miss + missprior} ~ \code{Xterms} |  \code{Sterms},
 #'        which specifies the formula  for the outcome model as \code{response} ~ \code{Xterms} and that for the missing data mechanism model as \code{miss + missprior} ~ \code{Sterms}, 
 #'        where \code{Xterms} and the observed missingness predictors \code{Sterms} can be different, \code{miss} and \code{missprior} are the variable names in \code{data} denoting the missingness status at the 
-#'        current and prior visits, respectively.  
+#'        current and prior visits, respectively. 
+#' @references Ma G, Troxel AB, Heitjan DF. An Index of Local Sensitivity to Nonignorable Dropout in Longitudinal Modeling. Stat Med. 2005;24:2129-2150. \cr
+#' Xie H. Analyzing Longitudinal Clinical Trial Data with Nonignorable Missingness and Unknown Missingness Reasons. Comput Stat Data Anal. 2012;56:1287-1300. \cr
+#' Xie H, Qian Y. Measuring the Impact of Nonignorability in Panel Data with Non-Monotone Nonresponse. Journal of Applied Econometrics. 2012;27:129-159. 
 #' @name isnimgm
 #' @aliases isnimgm
 #' @import  matrixcalc mvtnorm nlme nnet  stats Formula
@@ -1135,6 +1138,7 @@ tmdm<- function(formula, data, weights, subset) {
 
 
    ## set reference level of the response for logistic regression.
+   mf$g_=as.factor(mf$g_)
    mf$g_=relevel(mf$g_, "O")
 
    ## (1) gp="D: set hhat=0 for all observations after dropout time

@@ -4,8 +4,15 @@
 \alias{isniglm}
 \title{Function for ISNI computation when the outcome follows GLMs.}
 \usage{
-isniglm(formula, family = gaussian, data, weights, subset,
-  start = NULL, offset)
+isniglm(
+  formula,
+  family = gaussian,
+  data,
+  weights,
+  subset,
+  start = NULL,
+  offset
+)
 }
 \arguments{
 \item{formula}{an object of class "Formula": a symbolic description of the models to be fitted for the outcome and missingness status variable.
@@ -74,4 +81,7 @@ total       <- c(1189,1710,978,1657,68,215,73,246)
 sosgrp <- data.frame(gender=gender, faculty=faculty, SAcount=SAcount, total=total)
 ymodel <- SAcount/total ~gender*faculty
 sosgrp.isni<-isniglm(ymodel, family=binomial, data=sosgrp, weight=total)
+}
+\references{
+Troxel AB, Ma G, Heitjan DF. An Index of Local Sensitivity to Nonignorability. Stat Sin. 2004;14:1221-1237.
 }

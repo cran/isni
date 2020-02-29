@@ -4,8 +4,16 @@
 \alias{isnimgm}
 \title{Function for ISNI computation when the outcome follows marginal multivariate Gaussian Models.}
 \usage{
-isnimgm(formula, data, cortype = "CS", id, subset, weights, predprobobs,
-  misni = FALSE)
+isnimgm(
+  formula,
+  data,
+  cortype = "CS",
+  id,
+  subset,
+  weights,
+  predprobobs,
+  misni = FALSE
+)
 }
 \arguments{
 \item{formula}{an object of class "Formula": a symbolic description of the models to be fitted for the outcome and missingness status variable.
@@ -56,4 +64,9 @@ qolef.isni=isnimgm(models, data=qolef, id=id)
 summary(qolef.isni)
 
 
+}
+\references{
+Ma G, Troxel AB, Heitjan DF. An Index of Local Sensitivity to Nonignorable Dropout in Longitudinal Modeling. Stat Med. 2005;24:2129-2150. \cr
+Xie H. Analyzing Longitudinal Clinical Trial Data with Nonignorable Missingness and Unknown Missingness Reasons. Comput Stat Data Anal. 2012;56:1287-1300. \cr
+Xie H, Qian Y. Measuring the Impact of Nonignorability in Panel Data with Non-Monotone Nonresponse. Journal of Applied Econometrics. 2012;27:129-159.
 }

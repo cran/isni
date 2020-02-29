@@ -1,0 +1,21 @@
+citHeader("To cite the R package isni in publications use:")
+
+citEntry(entry = "Article",
+  title        = "Measuring the Impact of Nonignorable Missingness Using the R packaeg {isni}",
+  author       = personList(as.person("Hui Xie"),
+                   as.person("Weihua Gao"), as.person("Baodong Xing"),as.person("Daniel Heitjan"), as.person("Donald Hedeker"),as.person( "Chengbo Yuan")),
+  journal      = "Computer Methods and Programs in Biomedicine",
+  year         = "2018",
+  volume       = "",
+  number       = "164",
+  pages        = "207--220",
+  url          = "https://doi.org/10.1016/j.cmpb.2018.06.014",
+
+  textVersion  =
+  paste("Xie, H., Gao,W., Xing, B., Heitjan, D, Hedeker, D and Yuan, C.(2018).",
+        "Measuring the Impact of Nonignorable Missingness Using the R packaeg {isni}.",
+        "Computer Methods and Programs in Biomedicine, 164, 207-220.",
+        "URL https://doi.org/10.1016/j.cmpb.2018.06.014.")
+)
+
+citFooter("For other citations, please check the References section of individual isni functions")

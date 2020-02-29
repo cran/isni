@@ -4,8 +4,7 @@
 \alias{isnilmm}
 \title{Function for ISNI computation when the outcome follows LMM.}
 \usage{
-isnilmm(formula, data, random, id, weights, subset, predprobobs,
-  misni = FALSE)
+isnilmm(formula, data, random, id, weights, subset, predprobobs, misni = FALSE)
 }
 \arguments{
 \item{formula}{an object of class "Formula": a symbolic description of the models to be fitted for the outcome and missingness status variable.
@@ -62,4 +61,8 @@ ymodel= y | g+ gp~   as.factor(time)*group+perf+sever
 result=isnilmm(ymodel, random=~1, id=id,  data=qolef)
 summary(result)
 
+}
+\references{
+Hui Xie and Yi Qian (2012) Measuring the impact of nonignorability in panel data with non-monotone nonresponse., Journal of Applied Econometrics 27: 129-159. \cr
+Hui Xie, Gao,W, Xing, B., Heitjan, D, Hedeker, D and Yuan, C. (2018) Measuring the Impact of Nonignorable Missingness Using the R packaeg isni, Computer Methods and Programs in Biomedicine 164 207-220.
 }

@@ -4,8 +4,7 @@
 \alias{summary.isnimgm}
 \title{Function to print out a summary of isnimgm  object in a matrix form.}
 \usage{
-\method{summary}{isnimgm}(object, digits = max(3, getOption("digits") -
-  2), ...)
+\method{summary}{isnimgm}(object, digits = max(3, getOption("digits") - 2), ...)
 }
 \arguments{
 \item{object}{the isnimgm object obtained from the isnimgm function}

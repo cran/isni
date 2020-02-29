@@ -4,8 +4,17 @@
 \alias{isniglmmbin}
 \title{Function for ISNI computation when the longitudinal/clustered binary outcome follows a GLMM.}
 \usage{
-isniglmmbin(formula, data, random, id, weights, subset, predprobobs,
-  misni = FALSE, method = 1)
+isniglmmbin(
+  formula,
+  data,
+  random,
+  id,
+  weights,
+  subset,
+  predprobobs,
+  misni = FALSE,
+  method = 1
+)
 }
 \arguments{
 \item{formula}{an object of class "Formula": a symbolic description of the models to be fitted for the outcome and missingness status variable.
@@ -65,4 +74,9 @@ random=~1
 result=isniglmmbin(formula, skquit, random, id,misni=FALSE,method=2)
 summary(result)
 
+}
+\references{
+Xie H. A Local Sensitivity Analysis Approach to Longitudinal Non-Gaussian Data with Non-Ignorable Dropout. Statist Med. 2008;27:3155-3177. \cr
+Xie H. Analyzing Longitudinal Clinical Trial Data with Nonignorable Missingness and Unknown Missingness Reasons. Comput Stat Data Anal. 2012;56:1287-1300. \cr
+Xie H, Qian Y. Measuring the Impact of Nonignorability in Panel Data with Non-Monotone Nonresponse. Journal of Applied Econometrics. 2012;27:129-159. \cr
 }

@@ -39,6 +39,8 @@
 #'
 #'        For \code{isnilmm}, \code{response} ~ \code{Xterms} specfied the fixed-effect part of the linear mixed-effects model for the outcome. The random-effect part of the model is
 #'        specified as a one-sided formula via the argument \code{random}. 
+#' @references Hui Xie and Yi Qian (2012) Measuring the impact of nonignorability in panel data with non-monotone nonresponse., Journal of Applied Econometrics 27: 129-159. \cr
+#' Hui Xie, Gao,W, Xing, B., Heitjan, D, Hedeker, D and Yuan, C. (2018) Measuring the Impact of Nonignorable Missingness Using the R packaeg isni, Computer Methods and Programs in Biomedicine 164 207-220. 
 #' @name isnilmm
 #' @aliases isnilmm
 #' @export

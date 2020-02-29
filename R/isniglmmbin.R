@@ -55,7 +55,10 @@ NULL
 #'        current and prior visits, respectively.  
 #'
 #'        For \code{isniglmm}, \code{response} ~ \code{Xterms} specfied the fixed-effect part of the linear mixed-effects model for the outcome. The random-effect part of the model is
-#'        specified as a one-sided formula via the argument \code{random}. 
+#'        specified as a one-sided formula via the argument \code{random}.
+#' @references Xie H. A Local Sensitivity Analysis Approach to Longitudinal Non-Gaussian Data with Non-Ignorable Dropout. Statist Med. 2008;27:3155-3177. \cr
+#' Xie H. Analyzing Longitudinal Clinical Trial Data with Nonignorable Missingness and Unknown Missingness Reasons. Comput Stat Data Anal. 2012;56:1287-1300. \cr
+#' Xie H, Qian Y. Measuring the Impact of Nonignorability in Panel Data with Non-Monotone Nonresponse. Journal of Applied Econometrics. 2012;27:129-159. \cr
 #' @name isniglmmbin
 #' @import  matrixcalc mvtnorm nnet  stats Formula mixor
 #' @importFrom lme4 glmer

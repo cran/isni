@@ -80,6 +80,8 @@
     #'         To use different sets of predictors, one can explicitly specifiy a two-equation formula as: \code{response} | \code{is.na(response)} ~ \code{Xterms} |  \code{Sterms},
     #'        which specifies the formula  for the complete-data model as \code{response} ~ \code{Xterms} and that for the missing data mechanism model as \code{is.na(response)} ~ \code{Sterms}, and 
     #'        \code{Xterms} and the observed predictors for missingness \code{Sterms} can be different. 
+    #' 
+    #' @references Troxel AB, Ma G, Heitjan DF. An Index of Local Sensitivity to Nonignorability. Stat Sin. 2004;14:1221-1237.
     #' @name isniglm
     #' @aliases isniglm
     #' @export isniglm
