@@ -4,7 +4,8 @@
 \alias{summary.isniglmm}
 \title{Function to print out a summary of isniglmm  object in a matrix form.}
 \usage{
-\method{summary}{isniglmm}(object, digits = max(3, getOption("digits") - 2), ...)
+\method{summary}{isniglmm}(object, digits = max(3, getOption("digits") -
+  2), ...)
 }
 \arguments{
 \item{object}{the isniglmm object obtained from the isniglmm function}

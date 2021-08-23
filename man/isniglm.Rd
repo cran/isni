@@ -4,15 +4,8 @@
 \alias{isniglm}
 \title{Function for ISNI computation when the outcome follows GLMs.}
 \usage{
-isniglm(
-  formula,
-  family = gaussian,
-  data,
-  weights,
-  subset,
-  start = NULL,
-  offset
-)
+isniglm(formula, family = gaussian, data, weights, subset,
+  start = NULL, offset)
 }
 \arguments{
 \item{formula}{an object of class "Formula": a symbolic description of the models to be fitted for the outcome and missingness status variable.

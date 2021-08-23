@@ -1,18 +1,18 @@
 <!DOCTYPE html>
 
-<html>
+<html xmlns="http://www.w3.org/1999/xhtml">
 
 <head>
 
 <meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
-<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <meta name="author" content="Hui Xie" />
 
-<meta name="date" content="2020-02-28" />
+<meta name="date" content="2021-08-21" />
 
 <title>isni</title>
 
@@ -20,9 +20,9 @@
 
 <style type="text/css">code{white-space: pre;}</style>
 <style type="text/css" data-origin="pandoc">
-code.sourceCode > span { display: inline-block; line-height: 1.25; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-code.sourceCode > span:empty { height: 1.2em; }
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode { white-space: pre; position: relative; }
 div.sourceCode { margin: 1em 0; }
@@ -32,16 +32,14 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 code.sourceCode { white-space: pre-wrap; }
-code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
 }
-pre.numberSource code
-  { counter-reset: source-line 0; }
-pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
+pre.numberSource a.sourceLine
+  { position: relative; left: -4em; }
+pre.numberSource a.sourceLine::before
+  { content: attr(title);
     position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
+    border: none; pointer-events: all; display: inline-block;
     -webkit-touch-callout: none; -webkit-user-select: none;
     -khtml-user-select: none; -moz-user-select: none;
     -ms-user-select: none; user-select: none;
@@ -50,9 +48,9 @@ pre.numberSource code > span > a:first-child::before
   }
 pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
 div.sourceCode
-  {   }
+  {  }
 @media screen {
-code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+a.sourceLine::before { text-decoration: underline; }
 }
 code span.al { color: #ff0000; font-weight: bold; } /* Alert */
 code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
@@ -98,7 +96,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
       var style = rule.style.cssText;
       // check if color or background-color is set
-      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      if (rule.style.color === '' || rule.style.backgroundColor === '') continue;
       // replace div.sourceCode by a pre.sourceCode rule
       sheets[i].deleteRule(j);
       sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
@@ -119,6 +117,9 @@ padding-right: 2em;
 font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
 font-size: 14px;
 line-height: 1.35;
+}
+#header {
+text-align: center;
 }
 #TOC {
 clear: both;
@@ -287,8 +288,7 @@ code > span.st { color: #d14; }
 code > span.co { color: #888888; font-style: italic; } 
 code > span.ot { color: #007020; } 
 code > span.al { color: #ff0000; font-weight: bold; } 
-code > span.fu { color: #900; font-weight: bold; } 
-code > span.er { color: #a61717; background-color: #e3d2d2; } 
+code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61717; background-color: #e3d2d2; } 
 </style>
 
 
@@ -303,7 +303,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">isni</h1>
 <h4 class="author">Hui Xie</h4>
-<h4 class="date">2020-02-28</h4>
+<h4 class="date">2021-08-21</h4>
 
 
 
@@ -318,24 +318,24 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <div id="the-sos-example" class="section level2">
 <h2>The <code>sos</code> example</h2>
 <p><code>sos</code> is dataset on a cross-sectional survey of sexual practices among students at the University of Edinburgh. The response variable is the students’ answer to the question ``Have you ever had sexual intercourse?’’. Because of the sensitivity of this question, many students declined to answer, leading to substantial missing data. We consider a simplified data set consisting of the answer to this question, with the student’s sex and faculty as predictors.</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="kw">library</span>(isni)</span>
-<span id="cb1-2"><a href="#cb1-2"></a><span class="kw">data</span>(sos)</span>
-<span id="cb1-3"><a href="#cb1-3"></a>sos[<span class="kw">sample</span>(<span class="kw">nrow</span>(sos),<span class="dv">10</span>),]</span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1"><span class="kw">library</span>(isni)</a>
+<a class="sourceLine" id="cb1-2" title="2"><span class="kw">data</span>(sos)</a>
+<a class="sourceLine" id="cb1-3" title="3">sos[<span class="kw">sample</span>(<span class="kw">nrow</span>(sos),<span class="dv">10</span>),]</a></code></pre></div>
 <pre><code>##      sexact gender faculty
-## 1647     no   male   other
-## 3556    yes female   other
-## 1321     no   male   other
-## 994     yes   male   other
-## 3466    yes female   other
-## 5694   &lt;NA&gt; female   other
-## 5053   &lt;NA&gt; female   other
-## 1989   &lt;NA&gt;   male   other
-## 6010     no female     mdv
-## 185     yes   male   other</code></pre>
+## 4578     no female   other
+## 1748   &lt;NA&gt;   male   other
+## 5041   &lt;NA&gt; female   other
+## 5371   &lt;NA&gt; female   other
+## 2028   &lt;NA&gt;   male   other
+## 1464     no   male   other
+## 885     yes   male   other
+## 2476   &lt;NA&gt;   male   other
+## 5086   &lt;NA&gt; female   other
+## 5350   &lt;NA&gt; female   other</code></pre>
 <p>The R code above loads the library <code>isni</code> and the data frame <code>sos</code>, displaying a random subsample of <span class="math inline">\(10\)</span> records. <code>sos</code> includes the following factor variables: <code>sexact</code> is the response to the question <code>Have you ever had sexual intercourse?</code> (two levels: no (reference level), yes); <code>gender</code> is the student’s sex (two levels: male (reference level), female); <code>faculty</code> is the student’s faculty (medical/dental/veterinary, all other faculty categories (reference level)).</p>
 <p>Assuming ignorable nonresponse, one can fit a logistic model (using responders only) to predict the outcome by sex, faculty and their interaction. We estimated the model with function :</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a>ymodel=<span class="st"> </span>sexact  <span class="op">~</span><span class="st"> </span>gender<span class="op">*</span>faculty</span>
-<span id="cb3-2"><a href="#cb3-2"></a><span class="kw">summary</span>(<span class="kw">glm</span>(ymodel,<span class="dt">family=</span>binomial, <span class="dt">data=</span>sos))</span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" title="1">ymodel=<span class="st"> </span>sexact  <span class="op">~</span><span class="st"> </span>gender<span class="op">*</span>faculty</a>
+<a class="sourceLine" id="cb3-2" title="2"><span class="kw">summary</span>(<span class="kw">glm</span>(ymodel,<span class="dt">family=</span>binomial, <span class="dt">data=</span>sos))</a></code></pre></div>
 <pre><code>## 
 ## Call:
 ## glm(formula = ymodel, family = binomial, data = sos)
@@ -365,12 +365,12 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 logit (Prob(is.na(sexact)=``yes&#39;&#39;))=\gamma_{0}^T s +\gamma_1*sexact 
 \end{eqnarray}\]</span> where the observed missingness predictor <code>s</code> including <code>gender</code>, <code>faculty</code> and their interaction. In the above nonresponse model, the probability of nonresponse to the sexual practice question is associated with the observed missingness predictor <code>s</code> via the parameter <span class="math inline">\(\gamma_0\)</span> and is associated with the partially missing outcome <code>sexact</code> via the parameter <span class="math inline">\(\gamma_1\)</span>. The nonignorable parameter <span class="math inline">\(\gamma_1\)</span> captures the mangnitude and nature of nonignrable missingness. When <span class="math inline">\(\gamma_1=0\)</span>, the nonresponse becomes ignorable in the sense that the probability of missingness is indepdent of unobserved values of <code>sexact</code>. The above MAR analysis provides consistent and valid estimates. When <span class="math inline">\(\gamma_1\)</span> departs from zero, the nonresponse becomes nonignorable and the above MAR estimates are subject to selection bias due to nonignorable nonresponse. The ISNI functions (specifically the <code>isniglm</code> function for this example) can be applied to evaluate the rate of change of model estimates in the neighborhood of the MAR model where the missingness probability is allowed to depend on the unobserved value of <code>sexact</code>, even after conditioning on the other missingness predictors in <code>s</code>.</p>
 <p>A simple ISNI analysis can be conducted using the <code>isniglm</code> function as follows:</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a>sos.isni&lt;-<span class="kw">isniglm</span>(ymodel, <span class="dt">family=</span>binomial, <span class="dt">data=</span>sos)</span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" title="1">sos.isni&lt;-<span class="kw">isniglm</span>(ymodel, <span class="dt">family=</span>binomial, <span class="dt">data=</span>sos)</a></code></pre></div>
 <pre><code>## # weights:  5 (4 variable)
 ## initial  value 4253.151100 
 ## final  value 4027.954580 
 ## converged</code></pre>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a>sos.isni</span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" title="1">sos.isni</a></code></pre></div>
 <pre><code>## 
 ## Call:
 ## isniglm(formula = ymodel, family = binomial, data = sos)
@@ -391,7 +391,7 @@ logit (Prob(is.na(sexact)=``yes&#39;&#39;))=\gamma_{0}^T s +\gamma_1*sexact
 ## 
 ## AIC of the MAR model: 4416.2</code></pre>
 <p>The <code>summary</code> function in the package expresses the <code>isniglm()</code> object:</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a> <span class="kw">summary</span>(sos.isni)</span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" title="1"> <span class="kw">summary</span>(sos.isni)</a></code></pre></div>
 <pre><code>## 
 ## Call:
 ## isniglm(formula = ymodel, family = binomial, data = sos)
@@ -411,8 +411,8 @@ c= \left| \frac{\text{SE} }{\text{ISNI}}\right|.
 <div id="two-equation-model-specification" class="section level2">
 <h2>Two-equation model specification</h2>
 <p>In the above we do not explicitly specify an missing data mechanism model (MDM) via <code>formula</code> argument in the <code>isniglm</code> function. The same analysis can be replicated by explicitly specifying an MDM model using the code below. The two-equation formula below <code>sexact | is.na(sexact)  ~ gender*faculty | gender *faculty</code> uses the operator <code>|</code> to separately specify variables used in the complete-data model and MDM. The two-equation formula means that the complete-data model is <code>sexact</code> <span class="math inline">\(\sim\)</span> <code>gender*faculty</code> and that <code>is.na(sexact)</code> and <code>gender*faculty</code> are the missingness indicator and the missingness predictor <span class="math inline">\(s\)</span> in the nonresponse model described above, respectively.</p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1"></a>ygmodel &lt;-<span class="st"> </span>sexact <span class="op">|</span><span class="st"> </span><span class="kw">is.na</span>(sexact)  <span class="op">~</span><span class="st"> </span>gender<span class="op">*</span>faculty <span class="op">|</span><span class="st"> </span>gender <span class="op">*</span>faculty</span>
-<span id="cb11-2"><a href="#cb11-2"></a><span class="kw">summary</span>(<span class="kw">isniglm</span>(ygmodel, <span class="dt">family=</span>binomial, <span class="dt">data=</span>sos))</span></code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" title="1">ygmodel &lt;-<span class="st"> </span>sexact <span class="op">|</span><span class="st"> </span><span class="kw">is.na</span>(sexact)  <span class="op">~</span><span class="st"> </span>gender<span class="op">*</span>faculty <span class="op">|</span><span class="st"> </span>gender <span class="op">*</span>faculty</a>
+<a class="sourceLine" id="cb11-2" title="2"><span class="kw">summary</span>(<span class="kw">isniglm</span>(ygmodel, <span class="dt">family=</span>binomial, <span class="dt">data=</span>sos))</a></code></pre></div>
 <pre><code>## # weights:  5 (4 variable)
 ## initial  value 4253.151100 
 ## final  value 4027.954580 
@@ -430,20 +430,20 @@ c= \left| \frac{\text{SE} }{\text{ISNI}}\right|.
 <div id="isni-analysis-for-grouped-binomial-outcome" class="section level2">
 <h2>ISNI Analysis for Grouped Binomial Outcome</h2>
 <p>Because all the covariates in  are categorical variables, one can also analyze the data as a grouped binomial outcome using the <code>weight</code> argument as below.</p>
-<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1"></a> gender &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">1</span>)</span>
-<span id="cb13-2"><a href="#cb13-2"></a> faculty &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>)</span>
-<span id="cb13-3"><a href="#cb13-3"></a>gender &lt;-<span class="st"> </span><span class="kw">factor</span>(gender, <span class="dt">levels =</span> <span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="dt">labels =</span><span class="kw">c</span>(<span class="st">&quot;male&quot;</span>, <span class="st">&quot;female&quot;</span>))</span>
-<span id="cb13-4"><a href="#cb13-4"></a>faculty &lt;-<span class="st"> </span><span class="kw">factor</span>(faculty, <span class="dt">levels =</span> <span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="dt">labels =</span><span class="kw">c</span>(<span class="st">&quot;other&quot;</span>, <span class="st">&quot;mdv&quot;</span>))</span>
-<span id="cb13-5"><a href="#cb13-5"></a> SAcount &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="ot">NA</span>, <span class="dv">1277</span>, <span class="ot">NA</span>, <span class="dv">1247</span>, <span class="ot">NA</span>, <span class="dv">126</span>, <span class="ot">NA</span>, <span class="dv">152</span>)</span>
-<span id="cb13-6"><a href="#cb13-6"></a> total  &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">1189</span>,<span class="dv">1710</span>,<span class="dv">978</span>,<span class="dv">1657</span>,<span class="dv">68</span>,<span class="dv">215</span>,<span class="dv">73</span>,<span class="dv">246</span>)</span>
-<span id="cb13-7"><a href="#cb13-7"></a>sosgrp &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">gender=</span>gender, <span class="dt">faculty=</span>faculty, <span class="dt">SAcount=</span>SAcount, <span class="dt">total=</span>total)</span>
-<span id="cb13-8"><a href="#cb13-8"></a>ymodel &lt;-<span class="st"> </span>SAcount<span class="op">/</span>total <span class="op">~</span>gender<span class="op">*</span>faculty</span>
-<span id="cb13-9"><a href="#cb13-9"></a> sosgrp.isni&lt;-<span class="kw">isniglm</span>(ymodel, <span class="dt">family=</span>binomial, <span class="dt">data=</span>sosgrp, <span class="dt">weight=</span>total)</span></code></pre></div>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb13-1" title="1"> gender &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb13-2" title="2"> faculty &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb13-3" title="3">gender &lt;-<span class="st"> </span><span class="kw">factor</span>(gender, <span class="dt">levels =</span> <span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="dt">labels =</span><span class="kw">c</span>(<span class="st">&quot;male&quot;</span>, <span class="st">&quot;female&quot;</span>))</a>
+<a class="sourceLine" id="cb13-4" title="4">faculty &lt;-<span class="st"> </span><span class="kw">factor</span>(faculty, <span class="dt">levels =</span> <span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="dt">labels =</span><span class="kw">c</span>(<span class="st">&quot;other&quot;</span>, <span class="st">&quot;mdv&quot;</span>))</a>
+<a class="sourceLine" id="cb13-5" title="5"> SAcount &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="ot">NA</span>, <span class="dv">1277</span>, <span class="ot">NA</span>, <span class="dv">1247</span>, <span class="ot">NA</span>, <span class="dv">126</span>, <span class="ot">NA</span>, <span class="dv">152</span>)</a>
+<a class="sourceLine" id="cb13-6" title="6"> total  &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">1189</span>,<span class="dv">1710</span>,<span class="dv">978</span>,<span class="dv">1657</span>,<span class="dv">68</span>,<span class="dv">215</span>,<span class="dv">73</span>,<span class="dv">246</span>)</a>
+<a class="sourceLine" id="cb13-7" title="7">sosgrp &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">gender=</span>gender, <span class="dt">faculty=</span>faculty, <span class="dt">SAcount=</span>SAcount, <span class="dt">total=</span>total)</a>
+<a class="sourceLine" id="cb13-8" title="8">ymodel &lt;-<span class="st"> </span>SAcount<span class="op">/</span>total <span class="op">~</span>gender<span class="op">*</span>faculty</a>
+<a class="sourceLine" id="cb13-9" title="9"> sosgrp.isni&lt;-<span class="kw">isniglm</span>(ymodel, <span class="dt">family=</span>binomial, <span class="dt">data=</span>sosgrp, <span class="dt">weight=</span>total)</a></code></pre></div>
 <pre><code>## # weights:  5 (4 variable)
 ## initial  value 4253.151100 
 ## final  value 4027.954580 
 ## converged</code></pre>
-<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1"></a><span class="kw">summary</span>(sosgrp.isni)</span></code></pre></div>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb15-1" title="1"><span class="kw">summary</span>(sosgrp.isni)</a></code></pre></div>
 <pre><code>## 
 ## Call:
 ## isniglm(formula = ymodel, family = binomial, data = sosgrp, weights = total)
@@ -456,12 +456,9 @@ c= \left| \frac{\text{SE} }{\text{ISNI}}\right|.
 </div>
 <div id="a-tutorial-containing-more-technical-background-and-examples-for-longitudinal-data" class="section level2">
 <h2>A tutorial containing more technical background and examples for longitudinal data</h2>
-<p>A tutorial describing the ISNI methodology and containing examples for ISNI computation for nonignorable missing data in longitudinal setting can be download (<a href="http://huixie.people.uic.edu/Research/ISNI_R_tutorial.pdf">via</a>)</p>
+<p>A tutorial describing the ISNI methodology and containing examples for ISNI computation for nonignorable missing data in longitudinal setting can be download (<a href="https://huixie.people.uic.edu/Research/ISNI_R_tutorial.pdf">via</a>)</p>
 </div>
 
-
-
-<!-- code folding -->
 
 
 <!-- dynamically load mathjax for compatibility with self-contained -->

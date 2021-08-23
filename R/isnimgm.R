@@ -236,7 +236,7 @@ isnimgm = function(formula, data, cortype="CS", id, subset, weights, predprobobs
   names(bD)=c(names(b), names(D))
                                    } else
   if (cortype=="UN" )                {
-  names(bD)=c(names(b), 'sigma', names(D[[2]]))
+  names(bD)=c(names(b), 'sigma', row.names(intervals(iggls)$corStruct))   ##names(D[[2]]))
                              }
   isnivec=isni
   dimnames(isnivec)<-list(names(bD),c("ISNI_IO", "ISNI_DO", "ISNI_II"))

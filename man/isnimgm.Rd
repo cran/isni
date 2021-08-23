@@ -4,16 +4,8 @@
 \alias{isnimgm}
 \title{Function for ISNI computation when the outcome follows marginal multivariate Gaussian Models.}
 \usage{
-isnimgm(
-  formula,
-  data,
-  cortype = "CS",
-  id,
-  subset,
-  weights,
-  predprobobs,
-  misni = FALSE
-)
+isnimgm(formula, data, cortype = "CS", id, subset, weights, predprobobs,
+  misni = FALSE)
 }
 \arguments{
 \item{formula}{an object of class "Formula": a symbolic description of the models to be fitted for the outcome and missingness status variable.

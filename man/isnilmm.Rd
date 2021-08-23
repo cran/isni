@@ -4,7 +4,8 @@
 \alias{isnilmm}
 \title{Function for ISNI computation when the outcome follows LMM.}
 \usage{
-isnilmm(formula, data, random, id, weights, subset, predprobobs, misni = FALSE)
+isnilmm(formula, data, random, id, weights, subset, predprobobs,
+  misni = FALSE)
 }
 \arguments{
 \item{formula}{an object of class "Formula": a symbolic description of the models to be fitted for the outcome and missingness status variable.

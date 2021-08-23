@@ -97,4 +97,4 @@ summary(sosgrp.isni)
 ## A tutorial containing more technical background and examples for longitudinal data
 
 A tutorial describing the ISNI methodology  and containing examples for ISNI computation for  nonignorable missing data in longitudinal setting can be download
-([via](http://huixie.people.uic.edu/Research/ISNI_R_tutorial.pdf))
+([via](https://huixie.people.uic.edu/Research/ISNI_R_tutorial.pdf))

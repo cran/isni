@@ -4,26 +4,17 @@
 \alias{isniglmmbin}
 \title{Function for ISNI computation when the longitudinal/clustered binary outcome follows a GLMM.}
 \usage{
-isniglmmbin(
-  formula,
-  data,
-  random,
-  id,
-  weights,
-  subset,
-  predprobobs,
-  misni = FALSE,
-  method = 1
-)
+isniglmmbin(formula, data, random, id, weights, subset, predprobobs,
+  misni = FALSE, nAGQ = 10, method = 1)
 }
 \arguments{
 \item{formula}{an object of class "Formula": a symbolic description of the models to be fitted for the outcome and missingness status variable.
 The details of model specification are given under "Details".}
 
-\item{data}{the name of data frame containing all the variables in the model and all the observations including those intended to be collected 
+\item{data}{the name of data frame containing all the variables in the model and all the observations including those intended to be collected
 but became missing.}
 
-\item{random}{an object of class "formula": an one-sided linear formula description of the random-effects part of the model to be fitted 
+\item{random}{an object of class "formula": an one-sided linear formula description of the random-effects part of the model to be fitted
 for the outcome}
 
 \item{id}{the name of the level-2 clustering variable.}
@@ -35,30 +26,37 @@ for the outcome}
 \item{predprobobs}{Null if using buil-in multinomial transitional logistic model to obtain predicted probabilities of being observed;
 otherwise user supply the name of the variable in \code{data} that gives these probabilities for all the observations in the data.}
 
-\item{misni}{FALSE if using the default approach to computing ISNI with a scalar nonignorability parameter; 
+\item{misni}{FALSE if using the default approach to computing ISNI with a scalar nonignorability parameter;
 TRUE when computing ISNI with multiple nonignorability parameters.}
 
+\item{nAGQ}{integer scalar - the number of points per axis for evaluating the adaptive Gauss-Hermite approximation to the log-likelihood for
+obtaining MAR estimates using the R function glmer().
+Defaults to 10, corresponding to the 10-points Gaussian quarature. A value of 1 corresponds to Laplace approximation. Values greater than 1 produce
+greater accuracy in the  evaluation of the log-likelihood at the expense of speed.  A value of zero
+uses a faster but less exact form of parameter estimation for GLMMs by optimizing the random effects and the fixed-effects
+coefficients in the penalized iteratively reweighted least squares step. (See documentation for glmer() for Details.)}
+
 \item{method}{Indicate the method to obtain the MAR estimates:
-1: OPTIM(); 2: MIXOR(); 3: GLMER()}
+1: GLMER(); 2:  OPTIM()}
 }
 \description{
 Calculate the ISNI when the regression outcome is subject to missingness and follows generalized linear mixed-effects models (GLMMs) for binary outcomes.
 }
 \details{
 The ISNI analysis is based on a joint selection model and requires specifying two model equations: the outcome model and the missingness mechanism model.
-       At a minimum, the user should supply a single-equation in the typical form:  \code{response} ~ \code{Xterms} where \code{response} is the (numeric or factor) vector for the binnary outcome of interest and \code{Xterms} 
-       is a series of terms, separated by + operators, which specify a linear predictor for response. With the signle-equation specification, the \code{isniglmm} function 
-       will by default use the utility function \code{definemissingstatus} provided in the package to generate the 
-       missingness status variables at the current and prior visits and then use \code{Xterms} as the predictors for fitting a first-order transitional missing data model. 
+       At a minimum, the user should supply a single-equation in the typical form:  \code{response} ~ \code{Xterms} where \code{response} is the (numeric or factor) vector for the binnary outcome of interest and \code{Xterms}
+       is a series of terms, separated by + operators, which specify a linear predictor for response. With the signle-equation specification, the \code{isniglmm} function
+       will by default use the utility function \code{definemissingstatus} provided in the package to generate the
+       missingness status variables at the current and prior visits and then use \code{Xterms} as the predictors for fitting a first-order transitional missing data model.
        It is important to sort within-\code{id} observations  by time so that the missingness status variables can be defined correctly in this default setting.  The \code{isniglmmbin()} then computes the MAR estimates and conducts ISNI computation
-       to evaluate the rate of change of model estimates in the neighborhood of the MAR model where the missingness probability is allowed to depend on the unobserved value 
-       of \code{response},   even after  conditioning on the other  missingness predictors. 
+       to evaluate the rate of change of model estimates in the neighborhood of the MAR model where the missingness probability is allowed to depend on the unobserved value
+       of \code{response},   even after  conditioning on the other  missingness predictors.
 
-       The above single-equation formula specification uses the same set of predictors for the outcome model and the missingness mechanism model for computing ISNI.  
+       The above single-equation formula specification uses the same set of predictors for the outcome model and the missingness mechanism model for computing ISNI.
        To use different sets of predictors, one can explicitly specifiy a two-equation formula as: \code{response} | \code{miss + missprior} ~ \code{Xterms} |  \code{Sterms},
-       which specifies the formula  for the outcome model as \code{response} ~ \code{Xterms} and that for the missingness mechanism model as \code{miss | missprior} ~ \code{Sterms}, 
-       where \code{Xterms} and \code{Sterms} can be different, \code{miss} and \code{missprior} are the variable names in \code{data} denoting the missingness status at the 
-       current and prior visits, respectively.  
+       which specifies the formula  for the outcome model as \code{response} ~ \code{Xterms} and that for the missingness mechanism model as \code{miss | missprior} ~ \code{Sterms},
+       where \code{Xterms} and \code{Sterms} can be different, \code{miss} and \code{missprior} are the variable names in \code{data} denoting the missingness status at the
+       current and prior visits, respectively.
 
        For \code{isniglmm}, \code{response} ~ \code{Xterms} specfied the fixed-effect part of the linear mixed-effects model for the outcome. The random-effect part of the model is
        specified as a one-sided formula via the argument \code{random}.
@@ -67,12 +65,13 @@ The ISNI analysis is based on a joint selection model and requires specifying tw
 
 data(skquit)
 
-formula=quit~time 
+formula=quit~time
 ## formula=quit~time + helmert1:as.factor(time) +helmert2:as.factor(time)+ helmert3:as.factor(time)
 random=~1
 
-result=isniglmmbin(formula, skquit, random, id,misni=FALSE,method=2)
-summary(result)
+## Uncomment the following two lines of codes to run isniglmmbin() and report result with summary()
+##result=isniglmmbin(formula, skquit, random, id,misni=FALSE,method=1)
+##summary(result)
 
 }
 \references{

@@ -4,7 +4,8 @@
 \alias{print.isniglmm}
 \title{Function to print  the isniglmm object.}
 \usage{
-\method{print}{isniglmm}(x, digits = max(3, getOption("digits") - 2), ...)
+\method{print}{isniglmm}(x, digits = max(3, getOption("digits") - 2),
+  ...)
 }
 \arguments{
 \item{x}{the isniglmm object obtained from the isniglmm function}

@@ -4,7 +4,8 @@
 \alias{summary.isniglm}
 \title{Function to print out a summary of isniglm  object in a matrix form.}
 \usage{
-\method{summary}{isniglm}(object, digits = max(3, getOption("digits") - 2), ...)
+\method{summary}{isniglm}(object, digits = max(3, getOption("digits") -
+  2), ...)
 }
 \arguments{
 \item{object}{the isniglm object obtained from the isniglm function}
